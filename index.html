@@ -1,0 +1,2431 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Mapa de Volatilidade Global — Descubra os melhores horários para operar. Ferramenta gratuita do Belotto Trader.">
+  <meta property="og:title" content="Mapa de Volatilidade Global | Belotto Trader">
+  <meta property="og:description" content="Sessões globais, sobreposições institucionais e janelas de liquidez — ajustados para o seu fuso horário.">
+  <title>Mapa de Volatilidade Global | Belotto Trader</title>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <!-- Luxon (timezone) -->
+  <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+
+  <style>
+    /* ============================================================
+       RESET
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    button, input, select { font-family: inherit; }
+    a { text-decoration: none; color: inherit; }
+    img { display: block; max-width: 100%; }
+
+    /* ============================================================
+       DESIGN TOKENS
+    ============================================================ */
+    :root {
+      /* Surfaces */
+      --bg:          #07070f;
+      --bg-raised:   #0d0d1c;
+      --card:        rgba(255,255,255,0.034);
+      --card-hover:  rgba(255,255,255,0.065);
+      --border:      rgba(255,255,255,0.072);
+      --border-hi:   rgba(255,255,255,0.13);
+
+      /* Brand accents */
+      --green:   #00e87a;
+      --green-d: #00bb60;
+      --blue:    #1a7fff;
+      --purple:  #7c3aed;
+      --gold:    #f5c518;
+      --orange:  #f97316;
+      --red:     #ef4444;
+      --cyan:    #22d3ee;
+
+      /* Text */
+      --t1: #eaeaf8;    /* primary */
+      --t2: #8888aa;    /* secondary */
+      --t3: #3a3a5c;    /* muted */
+
+      /* Radius */
+      --r:    16px;
+      --r-sm: 10px;
+      --r-xs: 7px;
+
+      /* Transitions */
+      --ease: cubic-bezier(.22,.68,0,1.2);
+    }
+
+    /* ============================================================
+       BASE
+    ============================================================ */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--t1);
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Subtle grid texture */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,232,122,.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,232,122,.018) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ============================================================
+       TYPOGRAPHY HELPERS
+    ============================================================ */
+    .mono { font-family: "SF Mono","Fira Code","Fira Mono","Roboto Mono",monospace; }
+
+    .eyebrow {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 12px;
+    }
+
+    .section-header {
+      margin-bottom: 28px;
+    }
+
+    .section-header h2 {
+      font-size: clamp(20px, 3vw, 26px);
+      font-weight: 800;
+      letter-spacing: -.03em;
+      line-height: 1.15;
+      margin-bottom: 4px;
+    }
+
+    .section-header p {
+      font-size: 14px;
+      color: var(--t2);
+    }
+
+    .grad-text {
+      background: linear-gradient(135deg, #fff 0%, #9090c0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ============================================================
+       GLASS CARD
+    ============================================================ */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: var(--r);
+      transition: background .25s, border-color .25s, transform .25s var(--ease), box-shadow .25s;
+    }
+
+    .card:hover {
+      background: var(--card-hover);
+      border-color: var(--border-hi);
+    }
+
+    .card-lift:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 48px rgba(0,0,0,.4);
+    }
+
+    /* Accent top-border */
+    .card-accent-green  { border-top: 2px solid var(--green); }
+    .card-accent-blue   { border-top: 2px solid var(--blue); }
+    .card-accent-purple { border-top: 2px solid var(--purple); }
+    .card-accent-gold   { border-top: 2px solid var(--gold); }
+    .card-accent-orange { border-top: 2px solid var(--orange); }
+
+    /* Left rule */
+    .card-rule::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 16px; bottom: 16px;
+      width: 3px;
+      border-radius: 0 3px 3px 0;
+    }
+    .card-rule-green::before  { background: linear-gradient(180deg, var(--green), transparent); }
+    .card-rule-blue::before   { background: linear-gradient(180deg, var(--blue), transparent); }
+    .card-rule-orange::before { background: linear-gradient(180deg, var(--orange), transparent); }
+    .card-rule-purple::before { background: linear-gradient(180deg, var(--purple), transparent); }
+    .card-rule-gold::before   { background: linear-gradient(180deg, var(--gold), transparent); }
+
+    /* Glow halos */
+    .glow-g  { box-shadow: 0 0 40px rgba(0,232,122,.12), 0 4px 32px rgba(0,0,0,.3); }
+    .glow-b  { box-shadow: 0 0 40px rgba(26,127,255,.12), 0 4px 32px rgba(0,0,0,.3); }
+    .glow-p  { box-shadow: 0 0 40px rgba(124,58,237,.14), 0 4px 32px rgba(0,0,0,.3); }
+    .glow-au { box-shadow: 0 0 40px rgba(245,197,24,.1), 0 4px 32px rgba(0,0,0,.3); }
+
+    /* Radial glows (positioned overlays) */
+    .radial-g::after {
+      content: '';
+      position: absolute;
+      inset: -60px;
+      background: radial-gradient(ellipse 60% 60% at 80% 20%, rgba(0,232,122,.09) 0%, transparent 60%);
+      pointer-events: none; border-radius: inherit;
+    }
+
+    /* ============================================================
+       BADGE / CHIP
+    ============================================================ */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .badge-g  { background: rgba(0,232,122,.1);  color: var(--green);  border: 1px solid rgba(0,232,122,.22); }
+    .badge-b  { background: rgba(26,127,255,.1); color: var(--blue);   border: 1px solid rgba(26,127,255,.22); }
+    .badge-p  { background: rgba(124,58,237,.1); color: var(--purple); border: 1px solid rgba(124,58,237,.22); }
+    .badge-au { background: rgba(245,197,24,.1); color: var(--gold);   border: 1px solid rgba(245,197,24,.22); }
+    .badge-or { background: rgba(249,115,22,.1); color: var(--orange); border: 1px solid rgba(249,115,22,.22); }
+    .badge-rd { background: rgba(239,68,68,.1);  color: var(--red);    border: 1px solid rgba(239,68,68,.22); }
+    .badge-off{ background: rgba(255,255,255,.05); color: var(--t3);   border: 1px solid var(--border); }
+
+    /* Pulse dot */
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-g  { background: var(--green);  box-shadow: 0 0 7px var(--green);  animation: blink 2.2s ease infinite; }
+    .dot-b  { background: var(--blue);   box-shadow: 0 0 7px var(--blue);   animation: blink 2.2s ease infinite; }
+    .dot-p  { background: var(--purple); box-shadow: 0 0 7px var(--purple); animation: blink 2.2s ease infinite; }
+    .dot-or { background: var(--orange); box-shadow: 0 0 7px var(--orange); animation: blink 2.2s ease infinite; }
+    .dot-rd { background: var(--red);    box-shadow: 0 0 7px var(--red);    animation: blink 2.2s ease infinite; }
+    .dot-au { background: var(--gold);   box-shadow: 0 0 7px var(--gold);   animation: blink 2.2s ease infinite; }
+    .dot-off{ background: var(--t3); }
+
+    @keyframes blink {
+      0%,100%{ opacity:1; transform:scale(1); }
+      50%    { opacity:.55; transform:scale(.82); }
+    }
+
+    /* Tag (asset chip) */
+    .tag {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: var(--r-xs);
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--border);
+      color: var(--t2);
+    }
+
+    /* ============================================================
+       BUTTONS
+    ============================================================ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      border: none;
+      border-radius: var(--r-sm);
+      cursor: pointer;
+      font-weight: 800;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      transition: transform .25s var(--ease), box-shadow .25s, opacity .2s;
+    }
+
+    .btn:active { transform: scale(.97); }
+
+    .btn-primary {
+      padding: 17px 28px;
+      font-size: 14px;
+      background: linear-gradient(135deg, var(--green), var(--green-d));
+      color: #04170d;
+      box-shadow: 0 4px 22px rgba(0,232,122,.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 36px rgba(0,232,122,.52);
+    }
+
+    .btn-cta {
+      padding: 17px 36px;
+      font-size: 14px;
+      background: linear-gradient(135deg, var(--purple), #5b21b6);
+      color: #fff;
+      box-shadow: 0 4px 22px rgba(124,58,237,.4);
+    }
+
+    .btn-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 40px rgba(124,58,237,.6);
+    }
+
+    .btn-loading { opacity: .65; pointer-events: none; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2.5px solid rgba(0,0,0,.25);
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin .65s linear infinite;
+    }
+
+    /* ============================================================
+       FORM INPUTS
+    ============================================================ */
+    .field { display: flex; flex-direction: column; gap: 7px; }
+
+    .field label {
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--t2);
+    }
+
+    .input {
+      width: 100%;
+      padding: 14px 16px;
+      background: rgba(255,255,255,.045);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      color: var(--t1);
+      font-size: 15px;
+      outline: none;
+      transition: border-color .2s, background .2s, box-shadow .2s;
+    }
+
+    .input::placeholder { color: var(--t3); }
+
+    .input:focus {
+      border-color: var(--green);
+      background: rgba(0,232,122,.03);
+      box-shadow: 0 0 0 3px rgba(0,232,122,.1);
+    }
+
+    .form-err {
+      padding: 10px 14px;
+      border-radius: var(--r-xs);
+      font-size: 12.5px;
+      background: rgba(239,68,68,.08);
+      border: 1px solid rgba(239,68,68,.22);
+      color: var(--red);
+      display: none;
+    }
+
+    /* TZ selector */
+    .tz-select {
+      appearance: none;
+      -webkit-appearance: none;
+      background: rgba(255,255,255,.048);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xs);
+      color: var(--t1);
+      font-size: 13px;
+      padding: 8px 30px 8px 11px;
+      cursor: pointer;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .tz-select:focus, .tz-select:hover { border-color: var(--green); }
+
+    .tz-select-wrap { position: relative; }
+
+    .tz-select-wrap::after {
+      content: "▾";
+      position: absolute;
+      right: 9px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--t3);
+      pointer-events: none;
+      font-size: 11px;
+    }
+
+    /* ============================================================
+       LAYOUT
+    ============================================================ */
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 44px 0;
+    }
+
+    .section { margin-bottom: 44px; }
+
+    /* ============================================================
+       SCROLL PROGRESS
+    ============================================================ */
+    #scroll-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--green), var(--blue));
+      z-index: 500;
+      width: 0%;
+      transition: width .1s linear;
+    }
+
+    /* ============================================================
+       ANIMATIONS
+    ============================================================ */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes glowPulse {
+      0%,100% { box-shadow: 0 0 24px rgba(0,232,122,.1), 0 4px 32px rgba(0,0,0,.3); }
+      50%      { box-shadow: 0 0 44px rgba(0,232,122,.22), 0 4px 32px rgba(0,0,0,.3); }
+    }
+
+    @keyframes scanline {
+      0%   { transform: translateX(-100%); }
+      100% { transform: translateX(200%); }
+    }
+
+    .fade-up { animation: fadeUp .5s ease both; }
+    .d1 { animation-delay: .08s; }
+    .d2 { animation-delay: .16s; }
+    .d3 { animation-delay: .24s; }
+    .d4 { animation-delay: .32s; }
+    .d5 { animation-delay: .40s; }
+    .d6 { animation-delay: .48s; }
+
+    /* ============================================================
+       ■ LEAD GATE
+    ============================================================ */
+    #gate {
+      position: fixed; inset: 0; z-index: 300;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+      overflow-y: auto;
+      background:
+        radial-gradient(ellipse 70% 60% at 20% 10%, rgba(0,232,122,.06) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 50% at 80% 90%, rgba(26,127,255,.06) 0%, transparent 55%),
+        var(--bg);
+    }
+
+    .gate-inner {
+      width: 100%;
+      max-width: 460px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      padding: 8px 0 40px;
+    }
+
+    .gate-logo-area {
+      text-align: center;
+    }
+
+    .gate-logo-area img {
+      height: 36px;
+      margin: 0 auto 4px;
+    }
+
+    .gate-logo-fallback {
+      font-size: 19px;
+      font-weight: 900;
+      letter-spacing: -.03em;
+    }
+
+    .gate-logo-fallback span:first-child {
+      background: linear-gradient(135deg, var(--green), var(--blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .gate-logo-fallback span:last-child { color: var(--t3); font-weight: 300; margin-left: 5px; }
+
+    .gate-brand-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--t3);
+      margin-top: 4px;
+    }
+
+    .gate-hero { text-align: center; }
+
+    .gate-hero h1 {
+      font-size: clamp(28px, 7vw, 48px);
+      font-weight: 900;
+      letter-spacing: -.04em;
+      line-height: 1.05;
+      margin-bottom: 14px;
+    }
+
+    .gate-hero p {
+      font-size: 15px;
+      color: var(--t2);
+      line-height: 1.68;
+      margin-bottom: 10px;
+    }
+
+    .gate-hero .tz-note {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      color: var(--green);
+      margin-top: 4px;
+    }
+
+    /* Benefits strip */
+    .gate-benefits {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .gate-benefit {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--t2);
+    }
+
+    .benefit-icon {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: rgba(0,232,122,.1);
+      border: 1px solid rgba(0,232,122,.22);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+      flex-shrink: 0;
+      color: var(--green);
+    }
+
+    /* Form card */
+    .gate-form-card {
+      background: rgba(255,255,255,.028);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 30px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      backdrop-filter: blur(24px);
+    }
+
+    .gate-form-header {
+      font-size: 14px;
+      font-weight: 600;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--t1);
+    }
+
+    .gate-legal {
+      font-size: 11px;
+      color: var(--t3);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    /* ============================================================
+       ■ MAIN APP
+    ============================================================ */
+    #app { display: none; }
+    #app.show { display: block; }
+
+    /* ── NAV ── */
+    .nav {
+      position: sticky; top: 0; z-index: 200;
+      padding: 13px 0;
+      background: rgba(7,7,15,.88);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: center;
+      justify-content: space-between;
+      gap: 12px; position: relative; z-index: 1;
+    }
+
+    .nav-logo img { height: 30px; width: auto; }
+
+    .nav-logo-fb {
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: -.02em;
+    }
+
+    .nav-logo-fb span:first-child {
+      background: linear-gradient(135deg, var(--green), var(--blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-logo-fb span:last-child { color: var(--t3); font-weight: 300; }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .nav-live {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--t2);
+    }
+
+    .nav-tz-label {
+      font-size: 11.5px;
+      color: var(--t3);
+      font-weight: 600;
+      letter-spacing: .05em;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 56px 0 36px;
+      text-align: center;
+      position: relative;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 700px; height: 280px;
+      background: radial-gradient(ellipse, rgba(0,232,122,.07) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .hero h1 {
+      font-size: clamp(30px, 5.5vw, 58px);
+      font-weight: 900;
+      letter-spacing: -.05em;
+      line-height: 1.04;
+      margin-bottom: 14px;
+    }
+
+    .hero-sub {
+      font-size: clamp(14px, 2vw, 17px);
+      color: var(--t2);
+      max-width: 580px;
+      margin: 0 auto;
+      line-height: 1.72;
+    }
+
+    /* ── TZ INFO BAR ── */
+    .tz-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 12px 18px;
+      background: rgba(0,232,122,.04);
+      border: 1px solid rgba(0,232,122,.14);
+      border-radius: var(--r-sm);
+      margin-bottom: 28px;
+      font-size: 12.5px;
+      color: var(--t2);
+    }
+
+    .tz-bar strong { color: var(--green); font-weight: 700; }
+
+    /* ── TZ CARD ── */
+    .tz-card {
+      padding: 28px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      animation: glowPulse 4s ease infinite;
+    }
+
+    .tz-card-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--t3);
+      margin-bottom: 5px;
+    }
+
+    .tz-card-name {
+      font-size: 21px;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      margin-bottom: 3px;
+    }
+
+    .tz-card-id {
+      font-size: 12.5px;
+      color: var(--t2);
+      font-family: "SF Mono","Fira Code",monospace;
+    }
+
+    .tz-card-detected {
+      font-size: 11px;
+      color: var(--t3);
+      margin-top: 9px;
+      font-family: monospace;
+    }
+
+    .tz-card-detected span { color: var(--t2); }
+
+    .tz-main-time {
+      font-size: 40px;
+      font-weight: 800;
+      font-family: "SF Mono","Fira Code",monospace;
+      letter-spacing: -.03em;
+      color: var(--green);
+      line-height: 1;
+      text-align: right;
+    }
+
+    .tz-main-date {
+      font-size: 11.5px;
+      color: var(--t2);
+      text-align: right;
+      margin-top: 5px;
+    }
+
+    /* Scanline shimmer on card */
+    .tz-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -60%;
+      width: 40%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0,232,122,.04), transparent);
+      animation: scanline 6s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    /* ── GLOBAL CLOCKS ── */
+    .clocks-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+    }
+
+    .clock-card {
+      padding: 18px 14px;
+      text-align: center;
+      transition: transform .2s var(--ease), border-color .2s;
+    }
+
+    .clock-card.open {
+      border-color: rgba(0,232,122,.3);
+      background: rgba(0,232,122,.04);
+    }
+
+    .clock-city {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--t3);
+      margin-bottom: 7px;
+    }
+
+    .clock-time {
+      font-size: 20px;
+      font-weight: 700;
+      font-family: "SF Mono","Fira Code",monospace;
+      letter-spacing: -.02em;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .clock-tz {
+      font-size: 9.5px;
+      color: var(--t3);
+      font-family: monospace;
+    }
+
+    /* ── SESSION STATUS ── */
+    .session-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .session-now-card {
+      grid-column: 1 / -1;
+      padding: 28px;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .session-icon {
+      width: 56px; height: 56px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+      flex-shrink: 0;
+    }
+
+    .session-info { flex: 1; min-width: 0; }
+
+    .session-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--t3);
+      margin-bottom: 5px;
+    }
+
+    .session-name {
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: -.03em;
+      line-height: 1.1;
+      margin-bottom: 5px;
+    }
+
+    .session-msg { font-size: 13.5px; color: var(--t2); }
+
+    .session-badge-pos {
+      position: absolute;
+      top: 22px; right: 22px;
+    }
+
+    .stat-mini {
+      padding: 22px 24px;
+    }
+
+    .stat-mini-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--t3);
+      margin-bottom: 8px;
+    }
+
+    .stat-mini-val {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      margin-bottom: 4px;
+    }
+
+    .stat-mini-sub { font-size: 12.5px; color: var(--t2); }
+
+    /* ── TIMELINE ── */
+    .timeline-card {
+      padding: 28px;
+    }
+
+    .timeline-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .timeline-inner {
+      min-width: 640px;
+      position: relative;
+    }
+
+    .tl-hour-row {
+      display: flex;
+      margin-bottom: 6px;
+      padding-left: 80px;
+    }
+
+    .tl-hour {
+      flex: 1;
+      font-size: 9.5px;
+      color: var(--t3);
+      font-family: monospace;
+      text-align: left;
+    }
+
+    /* Vertical grid lines */
+    .tl-grid {
+      position: absolute;
+      top: 22px; left: 80px; right: 0; bottom: 8px;
+      display: flex;
+      pointer-events: none;
+    }
+
+    .tl-grid-line {
+      flex: 1;
+      border-left: 1px solid rgba(255,255,255,.04);
+    }
+
+    .tl-rows { display: flex; flex-direction: column; gap: 7px; }
+
+    .tl-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    .tl-row-label {
+      width: 80px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--t2);
+      flex-shrink: 0;
+      text-align: right;
+      padding-right: 12px;
+    }
+
+    .tl-track {
+      flex: 1;
+      height: 30px;
+      background: rgba(255,255,255,.035);
+      border-radius: 6px;
+      position: relative;
+      overflow: visible;
+    }
+
+    .tl-bar {
+      position: absolute;
+      top: 2px; height: 26px;
+      border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      transition: opacity .4s;
+    }
+
+    .tl-bar-sydney  { background: linear-gradient(90deg,rgba(26,127,255,.7),rgba(26,127,255,.4));  border:1px solid rgba(26,127,255,.5);  color:rgba(26,127,255,1); }
+    .tl-bar-tokyo   { background: linear-gradient(90deg,rgba(249,115,22,.7),rgba(249,115,22,.4));  border:1px solid rgba(249,115,22,.5);  color:rgba(249,115,22,1); }
+    .tl-bar-london  { background: linear-gradient(90deg,rgba(0,232,122,.7), rgba(0,232,122,.4));   border:1px solid rgba(0,232,122,.5);   color:rgba(0,232,122,1); }
+    .tl-bar-newyork { background: linear-gradient(90deg,rgba(124,58,237,.7),rgba(124,58,237,.4));  border:1px solid rgba(124,58,237,.5);  color:rgba(124,58,237,1); }
+
+    /* Overlap highlight zone */
+    .tl-overlap {
+      position: absolute;
+      top: -4px; bottom: -4px;
+      background: rgba(245,197,24,.06);
+      border-left: 1px solid rgba(245,197,24,.25);
+      border-right: 1px solid rgba(245,197,24,.25);
+      border-radius: 4px;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Now line */
+    .tl-now-line {
+      position: absolute;
+      top: -5px; bottom: -5px;
+      width: 2px;
+      background: rgba(255,255,255,.85);
+      box-shadow: 0 0 8px rgba(255,255,255,.5);
+      border-radius: 2px;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .tl-now-line::before {
+      content: "agora";
+      position: absolute;
+      top: -20px; left: 50%;
+      transform: translateX(-50%);
+      font-size: 8.5px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: rgba(255,255,255,.55);
+      white-space: nowrap;
+      text-transform: uppercase;
+    }
+
+    /* Timeline legend */
+    .tl-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin-top: 20px;
+    }
+
+    .tl-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      color: var(--t2);
+    }
+
+    .tl-legend-dot {
+      width: 12px; height: 12px;
+      border-radius: 3px;
+    }
+
+    .tl-legend-overlap {
+      width: 12px; height: 12px;
+      border-radius: 3px;
+      background: rgba(245,197,24,.2);
+      border: 1px solid rgba(245,197,24,.4);
+    }
+
+    /* ── SESSION CARDS ── */
+    .sessions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(252px, 1fr));
+      gap: 14px;
+    }
+
+    .session-card {
+      padding: 26px;
+    }
+
+    .sess-flag { font-size: 28px; margin-bottom: 11px; }
+
+    .sess-name {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      margin-bottom: 5px;
+    }
+
+    .sess-hours {
+      font-size: 15px;
+      font-family: "SF Mono","Fira Code",monospace;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .sess-status { margin-bottom: 11px; }
+
+    .sess-desc {
+      font-size: 13px;
+      color: var(--t2);
+      line-height: 1.55;
+      margin-bottom: 13px;
+    }
+
+    .sess-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+
+    /* ── VOLATILITY WINDOWS ── */
+    .vol-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(256px, 1fr));
+      gap: 14px;
+    }
+
+    .vol-card {
+      padding: 26px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .vol-icon { font-size: 26px; margin-bottom: 12px; }
+
+    .vol-badge { margin-bottom: 10px; }
+
+    .vol-name {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      margin-bottom: 6px;
+    }
+
+    .vol-time {
+      font-size: 24px;
+      font-weight: 800;
+      font-family: "SF Mono","Fira Code",monospace;
+      letter-spacing: -.02em;
+      margin-bottom: 10px;
+    }
+
+    .vol-desc {
+      font-size: 13px;
+      color: var(--t2);
+      line-height: 1.55;
+    }
+
+    /* ── BEST HOURS ── */
+    .best-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(256px, 1fr));
+      gap: 14px;
+    }
+
+    .best-card {
+      padding: 26px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .best-rank {
+      position: absolute;
+      top: 20px; right: 18px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      color: var(--t3);
+    }
+
+    .best-icon { font-size: 30px; margin-bottom: 14px; }
+
+    .best-name {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      margin-bottom: 5px;
+    }
+
+    .best-time {
+      font-size: 13.5px;
+      font-family: "SF Mono","Fira Code",monospace;
+      color: var(--t2);
+      margin-bottom: 12px;
+    }
+
+    .best-desc {
+      font-size: 13px;
+      color: var(--t2);
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+
+    .best-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+
+    /* Gradient bottom bar */
+    .best-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+    }
+
+    /* ── STATUS GRID ── */
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+      gap: 10px;
+    }
+
+    .status-card {
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-disc {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .status-txt { font-size: 13px; font-weight: 600; }
+    .status-sub { font-size: 10.5px; color: var(--t3); margin-top: 2px; }
+
+    /* ── CTA ── */
+    .cta-section {
+      padding: 70px 0 80px;
+      position: relative;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute; top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 800px; height: 350px;
+      background: radial-gradient(ellipse, rgba(124,58,237,.09) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .cta-card {
+      max-width: 660px;
+      margin: 0 auto;
+      padding: 56px 44px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-eyebrow { color: var(--purple); margin-bottom: 14px; }
+
+    .cta-title {
+      font-size: clamp(22px, 3.5vw, 34px);
+      font-weight: 900;
+      letter-spacing: -.03em;
+      line-height: 1.15;
+      margin-bottom: 14px;
+    }
+
+    .cta-text {
+      font-size: 15px;
+      color: var(--t2);
+      line-height: 1.7;
+      margin-bottom: 30px;
+    }
+
+    .cta-card::after {
+      content: '';
+      position: absolute;
+      top: -80px; right: -80px;
+      width: 220px; height: 220px;
+      background: radial-gradient(circle, rgba(124,58,237,.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      padding: 36px 0 56px;
+      border-top: 1px solid var(--border);
+    }
+
+    .warn-box {
+      padding: 18px 20px;
+      background: rgba(245,197,24,.04);
+      border: 1px solid rgba(245,197,24,.16);
+      border-radius: var(--r-sm);
+      margin-bottom: 20px;
+    }
+
+    .warn-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 5px;
+    }
+
+    .warn-text {
+      font-size: 12.5px;
+      color: var(--t2);
+      line-height: 1.6;
+    }
+
+    .legal-text {
+      font-size: 11.5px;
+      color: var(--t3);
+      line-height: 1.7;
+      text-align: center;
+    }
+
+    .footer-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 22px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-logo img { height: 22px; opacity: .35; }
+
+    .footer-logo-fb {
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: -.01em;
+      opacity: .3;
+      color: var(--t1);
+    }
+
+    .footer-copy { font-size: 11px; color: var(--t3); }
+
+    /* ============================================================
+       RESPONSIVE
+    ============================================================ */
+    @media (max-width: 900px) {
+      .clocks-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    @media (max-width: 640px) {
+      .clocks-grid { grid-template-columns: repeat(2, 1fr); }
+      .session-grid { grid-template-columns: 1fr; }
+      .session-now-card { flex-direction: column; text-align: center; gap: 16px; }
+      .session-badge-pos { position: static; }
+      .tz-card { grid-template-columns: 1fr; }
+      .tz-main-time { text-align: left; font-size: 32px; }
+      .tz-main-date { text-align: left; }
+      .nav-tz-label { display: none; }
+      .cta-card { padding: 36px 24px; }
+    }
+
+    @media (max-width: 480px) {
+      .wrap { padding: 0 16px; }
+      .gate-form-card { padding: 22px 18px; }
+      .vol-grid, .best-grid, .sessions-grid { grid-template-columns: 1fr; }
+      .status-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ────────────────────────────────────────────────────────────
+     SCROLL PROGRESS
+──────────────────────────────────────────────────────────── -->
+<div id="scroll-bar"></div>
+
+<!-- ============================================================
+     ■ LEAD GATE
+============================================================ -->
+<div id="gate">
+  <div class="gate-inner">
+
+    <!-- Logo -->
+    <div class="gate-logo-area fade-up">
+      <img src="logo.png" alt="Belotto Trader" id="gate-img"
+           onerror="document.getElementById('gate-img').style.display='none';document.getElementById('gate-logo-fb').style.display='block'">
+      <div id="gate-logo-fb" style="display:none" class="gate-logo-fallback">
+        <span>BELOTTO</span><span>TRADER</span>
+      </div>
+      <div class="gate-brand-tag">Clube do Gain · Ferramenta Gratuita</div>
+    </div>
+
+    <!-- Hero copy -->
+    <div class="gate-hero fade-up d1">
+      <div class="eyebrow">Mapa de Volatilidade Global</div>
+      <h1 class="grad-text">Pare de operar no ruído.</h1>
+      <p>
+        Descubra os horários em que o mercado realmente se movimenta — sessões abertas,
+        sobreposições institucionais, janelas de liquidez e os melhores momentos para operar.
+      </p>
+      <p style="font-size:13.5px">Veja sessões abertas, sobreposições, horários institucionais e janelas de liquidez.</p>
+      <div class="tz-note">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+        Horários ajustados automaticamente para o seu fuso horário
+      </div>
+    </div>
+
+    <!-- Benefits -->
+    <div class="gate-benefits fade-up d2">
+      <div class="gate-benefit"><div class="benefit-icon">✓</div><span>Sessões globais em tempo real com conversão de horário local</span></div>
+      <div class="gate-benefit"><div class="benefit-icon">✓</div><span>Sobreposição London + NY — maior liquidez do dia</span></div>
+      <div class="gate-benefit"><div class="benefit-icon">✓</div><span>Janelas de volatilidade para Nasdaq, Ouro, Forex e mais</span></div>
+      <div class="gate-benefit"><div class="benefit-icon">✓</div><span>Linha do tempo interativa de 24 horas com indicador ao vivo</span></div>
+    </div>
+
+    <!-- Form -->
+    <div class="gate-form-card fade-up d3">
+      <div class="gate-form-header">Informe seus dados para liberar acesso gratuito</div>
+
+      <div class="field">
+        <label for="f-name">Nome</label>
+        <input type="text" id="f-name" class="input" placeholder="Seu nome completo" autocomplete="name">
+      </div>
+
+      <div class="field">
+        <label for="f-email">E-mail</label>
+        <input type="email" id="f-email" class="input" placeholder="seu@email.com" autocomplete="email">
+      </div>
+
+      <div class="field">
+        <label for="f-wa">WhatsApp</label>
+        <input type="tel" id="f-wa" class="input" placeholder="+55 11 99999-9999" autocomplete="tel">
+      </div>
+
+      <div class="form-err" id="form-err"></div>
+
+      <button class="btn btn-primary" id="btn-submit" onclick="submitLead()" style="width:100%">
+        LIBERAR ACESSO GRATUITO
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,18 15,12 9,6"/></svg>
+      </button>
+
+      <div class="gate-legal">
+        Ao continuar, você concorda em receber conteúdo educacional sobre trading.<br>
+        Seus dados são protegidos e nunca serão compartilhados com terceiros.
+      </div>
+    </div>
+
+  </div><!-- /gate-inner -->
+</div><!-- /#gate -->
+
+
+<!-- ============================================================
+     ■ MAIN APP
+============================================================ -->
+<div id="app">
+
+  <!-- ── NAV ── -->
+  <nav class="nav">
+    <div class="nav-inner">
+
+      <!-- Logo -->
+      <div class="nav-logo">
+        <img src="logo.png" alt="Belotto Trader" id="nav-img"
+             onerror="document.getElementById('nav-img').style.display='none';document.getElementById('nav-logo-fb').style.display='block'">
+        <div id="nav-logo-fb" style="display:none" class="nav-logo-fb">
+          <span>BELOTTO</span><span> TRADER</span>
+        </div>
+      </div>
+
+      <!-- Right -->
+      <div class="nav-right">
+        <div class="nav-live" id="nav-live">
+          <span class="dot dot-g"></span>
+          <span id="nav-session-txt" style="font-size:12px;color:var(--t2)">Carregando...</span>
+        </div>
+        <span class="nav-tz-label">Visualizar em:</span>
+        <div class="tz-select-wrap">
+          <select class="tz-select" id="tz-sel" onchange="onTzChange(this.value)">
+            <option value="auto">🌐 Automático</option>
+            <option value="America/New_York">🇺🇸 Miami / New York</option>
+            <option value="America/Sao_Paulo">🇧🇷 Brasília</option>
+            <option value="Europe/Lisbon">🇵🇹 Lisboa</option>
+            <option value="Europe/London">🇬🇧 Londres</option>
+            <option value="Europe/Madrid">🇪🇸 Madrid</option>
+            <option value="Asia/Tokyo">🇯🇵 Tokyo</option>
+            <option value="Australia/Sydney">🇦🇺 Sydney</option>
+            <option value="UTC">🌍 UTC</option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="eyebrow fade-up">Belotto Trader · Paulo Belotto · Clube do Gain</div>
+      <h1 class="grad-text fade-up d1">Mapa de Volatilidade<br>Global</h1>
+      <p class="hero-sub fade-up d2">
+        Sessões abertas, sobreposições institucionais, janelas de liquidez e os melhores
+        momentos para operar — todos convertidos para o seu fuso horário.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── CONTAINER ── -->
+  <div class="wrap">
+
+    <!-- TZ INFO BAR -->
+    <div class="tz-bar fade-up d3">
+      <span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+        Exibindo em: <strong id="tz-bar-label">—</strong>
+      </span>
+      <span style="font-size:11px;color:var(--t3)">
+        Detectado: <code id="tz-bar-detected" style="font-family:monospace;font-size:11px"></code>
+      </span>
+    </div>
+
+    <!-- ── TZ CARD ── -->
+    <section class="section">
+      <div class="card glow-g tz-card fade-up" style="position:relative;overflow:hidden">
+        <div>
+          <div class="tz-card-label">Fuso Ativo</div>
+          <div class="tz-card-name" id="tz-name">—</div>
+          <div class="tz-card-id" id="tz-id">—</div>
+          <div class="tz-card-detected">Detectado: <span id="tz-detected">—</span></div>
+        </div>
+        <div>
+          <div class="tz-main-time mono" id="main-clock">--:--:--</div>
+          <div class="tz-main-date" id="main-date">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── GLOBAL CLOCKS ── -->
+    <section class="section">
+      <div class="section-header fade-up">
+        <div class="eyebrow">Relógios Globais</div>
+        <h2>Hora ao redor do mundo</h2>
+        <p>Atualização em tempo real · a cada segundo</p>
+      </div>
+      <div class="clocks-grid" id="clocks-grid">
+        <!-- JS populated -->
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ── SESSION STATUS ── -->
+    <section class="section">
+      <div class="section-header fade-up">
+        <div class="eyebrow">Status Operacional</div>
+        <h2>Sessão ativa agora</h2>
+        <p>Calculado automaticamente com base no horário atual</p>
+      </div>
+      <div class="session-grid">
+
+        <!-- Now card -->
+        <div class="card glow-g session-now-card" id="sess-now-card" style="position:relative;overflow:hidden">
+          <div class="session-icon" id="sess-icon" style="background:rgba(0,232,122,.1);border:1px solid rgba(0,232,122,.2)">🌍</div>
+          <div class="session-info">
+            <div class="session-label">Agora</div>
+            <div class="session-name" id="sess-name">Calculando...</div>
+            <div class="session-msg" id="sess-msg">—</div>
+          </div>
+          <div class="session-badge-pos" id="sess-badge"></div>
+        </div>
+
+        <!-- Next -->
+        <div class="card stat-mini">
+          <div class="stat-mini-label">Próxima Sessão</div>
+          <div class="stat-mini-val" id="next-name">—</div>
+          <div class="stat-mini-sub" id="next-time">—</div>
+        </div>
+
+        <!-- Liquidity -->
+        <div class="card stat-mini">
+          <div class="stat-mini-label">Nível de Liquidez</div>
+          <div class="stat-mini-val" id="liq-level">—</div>
+          <div class="stat-mini-sub" id="liq-sub">—</div>
+        </div>
+
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ── 24H TIMELINE ── -->
+    <section class="section">
+      <div class="section-header fade-up">
+        <div class="eyebrow">Linha do Tempo</div>
+        <h2>24 horas — Sessões Globais</h2>
+        <p>Visualize onde cada bolsa está aberta. Horário local: <strong id="tl-tz-label" style="color:var(--t1)">—</strong></p>
+      </div>
+
+      <div class="card timeline-card fade-up d1">
+        <div class="timeline-scroll">
+          <div class="timeline-inner" id="tl-inner">
+            <!-- JS populated -->
+          </div>
+        </div>
+
+        <div class="tl-legend">
+          <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(26,127,255,.7)"></div>Sydney</div>
+          <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(249,115,22,.7)"></div>Tokyo</div>
+          <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(0,232,122,.7)"></div>Londres</div>
+          <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(124,58,237,.7)"></div>New York</div>
+          <div class="tl-legend-item"><div class="tl-legend-overlap"></div>Sobreposição Londres+NY</div>
+          <div class="tl-legend-item" style="color:rgba(255,255,255,.5);font-size:11px">
+            <div style="width:2px;height:12px;background:rgba(255,255,255,.7);border-radius:1px"></div>Agora
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ── SESSIONS CARDS ── -->
+    <section class="section">
+      <div class="section-header fade-up">
+        <div class="eyebrow">Sessões de Mercado</div>
+        <h2>Bolsas do mundo</h2>
+        <p>Horários oficiais convertidos para <strong id="sess-tz-label" style="color:var(--t1)">seu fuso</strong></p>
+      </div>
+      <div class="sessions-grid" id="sess-grid">
+        <!-- JS populated -->
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ── VOLATILITY WINDOWS ── -->
+    <section class="section">
+      <div class="section-header fade-up">
+        <div class="eyebrow">Janelas de Volatilidade</div>
+        <h2>Momentos de maior movimentação</h2>
+        <p>Horários convertidos para <strong id="vol-tz-label" style="color:var(--t1)">seu fuso</strong></p>
+      </div>
+      <div class="vol-grid" id="vol-grid">
+        <!-- JS populated -->
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ── BEST HOURS ── -->
+    <section class="section">
+      <div class="section-header fade-up">
+        <div class="eyebrow">Melhores Horários</div>
+        <h2>Quando operar cada mercado</h2>
+        <p>Janelas de maior oportunidade · convertidas para <strong id="best-tz-label" style="color:var(--t1)">seu fuso</strong></p>
+      </div>
+      <div class="best-grid" id="best-grid">
+        <!-- JS populated -->
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ── MARKET STATUS ── -->
+    <section class="section">
+      <div class="section-header fade-up">
+        <div class="eyebrow">Indicadores</div>
+        <h2>Status de mercado atual</h2>
+        <p>Nível de atividade por categoria — atualizado em tempo real</p>
+      </div>
+      <div class="status-grid" id="status-grid">
+        <!-- JS populated -->
+      </div>
+    </section>
+
+  </div><!-- /wrap -->
+
+  <!-- ── CTA ── -->
+  <section class="cta-section">
+    <div class="wrap">
+      <div class="card glow-p cta-card" style="position:relative;overflow:hidden">
+        <div class="eyebrow cta-eyebrow">Clube do Gain · Paulo Belotto</div>
+        <h2 class="cta-title">Quer operar esses horários ao vivo comigo?</h2>
+        <p class="cta-text">
+          Participe das salas ao vivo e acompanhe o mercado em tempo real.<br>
+          Análises, entradas e gestão de risco ao vivo — todos os dias.
+        </p>
+        <a href="https://SEU-LINK-AQUI.com" target="_blank" rel="noopener" class="btn btn-cta">
+          ENTRAR NA SALA AO VIVO
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,18 15,12 9,6"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer class="footer">
+    <div class="wrap">
+
+      <div class="warn-box">
+        <div class="warn-title">⚠ Atenção</div>
+        <div class="warn-text">
+          Os horários podem variar em feriados, pregões especiais e semanas de ajuste de horário de verão.
+          Sempre confirme as informações no calendário econômico e na sua plataforma de trading.
+        </div>
+      </div>
+
+      <div class="legal-text">
+        Esta ferramenta não constitui recomendação de compra ou venda de ativos financeiros.<br>
+        Serve apenas para estudo, organização e contexto operacional. Trading envolve riscos. Opere com responsabilidade.
+      </div>
+
+      <div class="footer-bottom">
+        <div class="footer-logo">
+          <img src="logo.png" alt="Belotto Trader"
+               onerror="this.style.display='none';document.getElementById('footer-logo-fb').style.display='block'">
+          <div id="footer-logo-fb" style="display:none" class="footer-logo-fb">BELOTTO TRADER</div>
+        </div>
+        <div class="footer-copy">Mapa de Volatilidade Global © 2024 · Clube do Gain</div>
+      </div>
+
+    </div>
+  </footer>
+
+</div><!-- /#app -->
+
+
+<!-- ============================================================
+     ■ JAVASCRIPT
+============================================================ -->
+<script>
+/*
+  ================================================================
+  SUPABASE — SQL DA TABELA
+  Execute no SQL Editor do seu projeto Supabase:
+  ----------------------------------------------------------------
+
+  create table if not exists leads_market_sessions (
+    id              uuid primary key default gen_random_uuid(),
+    name            text not null,
+    email           text not null,
+    whatsapp        text not null,
+    detected_timezone  text,
+    selected_timezone  text,
+    timezone_label     text,
+    country_hint       text,
+    user_agent         text,
+    lead_source        text default 'mapa_volatilidade_global',
+    created_at      timestamptz default now()
+  );
+
+  ================================================================
+  INSTALAÇÃO RÁPIDA:
+  1. Cole sua SUPABASE_URL e SUPABASE_ANON_KEY abaixo
+  2. Execute o SQL acima no Supabase → SQL Editor
+  3. Adicione logo.png na mesma pasta do index.html
+  4. Faça o deploy (Netlify, Vercel, GitHub Pages, etc.)
+  ================================================================
+*/
+
+// ─── CONFIG ───────────────────────────────────────────────────
+const SUPABASE_URL      = "https://lawfuygegejkelstubpa.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_OhDFF1QPLZsQw2355W2MnQ_vew9ueEB";
+
+// ─── INIT SUPABASE ────────────────────────────────────────────
+// Só inicializa se as credenciais reais foram preenchidas
+let sb;
+const SB_CONFIGURED = (
+  SUPABASE_URL      !== "COLE_AQUI_SUA_URL"  &&
+  SUPABASE_ANON_KEY !== "COLE_AQUI_SUA_ANON_KEY" &&
+  SUPABASE_URL.startsWith("https://")
+);
+if (SB_CONFIGURED) {
+  try {
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  } catch(e) { console.warn("Supabase init error:", e); }
+} else {
+  console.info("ℹ️ Supabase não configurado — leads não serão salvos até você preencher SUPABASE_URL e SUPABASE_ANON_KEY.");
+}
+
+// ─── LUXON ────────────────────────────────────────────────────
+const { DateTime } = luxon;
+
+// ─── DATA: SESSIONS ──────────────────────────────────────────
+const SESSIONS = [
+  {
+    id: "sydney",
+    name: "Sydney",
+    flag: "🇦🇺",
+    icon: "🌊",
+    tz: "Australia/Sydney",
+    open: [10, 0],
+    close: [16, 0],
+    color: "var(--blue)",
+    barClass: "tl-bar-sydney",
+    badgeCls: "badge-b",
+    dotCls: "dot-b",
+    desc: "Menor liquidez global. Boa para acompanhar AUD, NZD e mercados oceânicos.",
+    assets: ["AUD/USD", "NZD/USD", "ASX 200"],
+    glowClass: "glow-b",
+    ruleClass: "card-rule-blue",
+    accentClass: "card-accent-blue",
+  },
+  {
+    id: "tokyo",
+    name: "Tokyo",
+    flag: "🇯🇵",
+    icon: "⛩",
+    tz: "Asia/Tokyo",
+    open: [9, 0],
+    close: [15, 0],
+    color: "var(--orange)",
+    barClass: "tl-bar-tokyo",
+    badgeCls: "badge-or",
+    dotCls: "dot-or",
+    desc: "Importante para JPY, Nikkei e Hang Seng. Movimentos moderados e direcionais.",
+    assets: ["USD/JPY", "Nikkei 225", "Hang Seng"],
+    glowClass: "",
+    ruleClass: "card-rule-orange",
+    accentClass: "card-accent-orange",
+  },
+  {
+    id: "london",
+    name: "Londres",
+    flag: "🇬🇧",
+    icon: "🏦",
+    tz: "Europe/London",
+    open: [8, 0],
+    close: [16, 30],
+    color: "var(--green)",
+    barClass: "tl-bar-london",
+    badgeCls: "badge-g",
+    dotCls: "dot-g",
+    desc: "Maior liquidez europeia. Essencial para Forex, Ouro e índices europeus.",
+    assets: ["EUR/USD", "GBP/USD", "Ouro", "FTSE 100"],
+    glowClass: "glow-g",
+    ruleClass: "card-rule-green",
+    accentClass: "card-accent-green",
+  },
+  {
+    id: "newyork",
+    name: "New York",
+    flag: "🇺🇸",
+    icon: "🗽",
+    tz: "America/New_York",
+    open: [9, 30],
+    close: [16, 0],
+    color: "var(--purple)",
+    barClass: "tl-bar-newyork",
+    badgeCls: "badge-p",
+    dotCls: "dot-p",
+    desc: "Principal sessão para Nasdaq, Dow Jones, S&P 500 e Ouro. Maior volume do mundo.",
+    assets: ["Nasdaq", "Dow Jones", "S&P 500", "Ouro"],
+    glowClass: "glow-p",
+    ruleClass: "card-rule-purple",
+    accentClass: "card-accent-purple",
+  },
+];
+
+// ─── DATA: VOLATILITY WINDOWS ─────────────────────────────────
+const VOL_WINDOWS = [
+  {
+    name: "Abertura Londres",
+    icon: "🟢",
+    originTz: "Europe/London",
+    start: [8, 0], end: [10, 0],
+    color: "var(--green)", badgeCls: "badge-g",
+    intensity: "Alta",
+    desc: "Maior entrada de liquidez europeia. Excelente para Forex, Ouro e índices europeus.",
+    accentClass: "card-accent-green",
+  },
+  {
+    name: "Sobreposição Londres + NY",
+    icon: "⚡",
+    originTz: "America/New_York",
+    start: [9, 30], end: [12, 0],
+    color: "var(--gold)", badgeCls: "badge-au",
+    intensity: "Máxima",
+    desc: "Maior liquidez do dia. Melhor fluxo institucional. Ideal para scalp e day trade.",
+    accentClass: "card-accent-gold",
+  },
+  {
+    name: "Abertura NYSE",
+    icon: "🚀",
+    originTz: "America/New_York",
+    start: [9, 30], end: [10, 30],
+    color: "var(--purple)", badgeCls: "badge-p",
+    intensity: "Máxima",
+    desc: "Maior volatilidade do mercado americano. Maior oportunidade. Maior risco.",
+    accentClass: "card-accent-purple",
+  },
+  {
+    name: "Power Hour",
+    icon: "⏰",
+    originTz: "America/New_York",
+    start: [15, 0], end: [16, 0],
+    color: "var(--orange)", badgeCls: "badge-or",
+    intensity: "Alta",
+    desc: "Movimentos finais do dia. Reposicionamento institucional. Fechamento de posições.",
+    accentClass: "card-accent-orange",
+  },
+];
+
+// ─── DATA: BEST HOURS ─────────────────────────────────────────
+const BEST_HOURS = [
+  {
+    rank: "#1", icon: "⚡", name: "Sobreposição Londres + NY",
+    color: "var(--gold)", afterBg: "var(--gold)",
+    originTz: "America/New_York", start: [9, 30], end: [12, 0],
+    desc: "O momento de maior liquidez e fluxo institucional do dia. Spreads comprimidos, volume máximo.",
+    tags: ["Forex", "Ouro", "Nasdaq", "S&P 500"],
+  },
+  {
+    rank: "#2", icon: "🚀", name: "Abertura Nasdaq / NYSE",
+    color: "var(--purple)", afterBg: "var(--purple)",
+    originTz: "America/New_York", start: [9, 30], end: [10, 30],
+    desc: "Maior volatilidade do mercado americano. Movimentos explosivos logo após a abertura.",
+    tags: ["Nasdaq", "Dow Jones", "S&P 500", "Ouro"],
+  },
+  {
+    rank: "#3", icon: "🌅", name: "Abertura Londres",
+    color: "var(--green)", afterBg: "var(--green)",
+    originTz: "Europe/London", start: [8, 0], end: [10, 0],
+    desc: "Entrada de grandes instituições europeias. Excelente para Forex e Ouro.",
+    tags: ["EUR/USD", "GBP/USD", "Ouro", "Forex"],
+  },
+  {
+    rank: "#4", icon: "⏰", name: "Power Hour",
+    color: "var(--orange)", afterBg: "var(--orange)",
+    originTz: "America/New_York", start: [15, 0], end: [16, 0],
+    desc: "Reposicionamento institucional no fim do dia. Movimentos direcionais rápidos.",
+    tags: ["Nasdaq", "Dow Jones", "S&P 500"],
+  },
+];
+
+// ─── TIMEZONE LABELS ─────────────────────────────────────────
+const TZ_LABELS = {
+  "auto":               "Automático",
+  "America/New_York":   "Miami / New York",
+  "America/Sao_Paulo":  "Brasil — Brasília",
+  "Europe/Lisbon":      "Portugal — Lisboa",
+  "Europe/London":      "Reino Unido — Londres",
+  "Europe/Madrid":      "Espanha — Madrid",
+  "Asia/Tokyo":         "Japão — Tokyo",
+  "Australia/Sydney":   "Austrália — Sydney",
+  "UTC":                "UTC",
+};
+
+// Country hints from timezone
+const COUNTRY_HINTS = {
+  "America/Sao_Paulo":"Brasil","America/Manaus":"Brasil","America/Belem":"Brasil",
+  "America/Fortaleza":"Brasil","America/Recife":"Brasil","America/Cuiaba":"Brasil",
+  "America/New_York":"EUA","America/Chicago":"EUA","America/Los_Angeles":"EUA",
+  "Europe/Lisbon":"Portugal","Europe/London":"Reino Unido","Europe/Madrid":"Espanha",
+  "Asia/Tokyo":"Japão","Australia/Sydney":"Austrália","Europe/Paris":"França",
+  "Europe/Berlin":"Alemanha","America/Buenos_Aires":"Argentina","America/Bogota":"Colômbia",
+  "America/Mexico_City":"México","Asia/Dubai":"Emirados","Asia/Singapore":"Singapura",
+};
+
+// ─── STATE ────────────────────────────────────────────────────
+const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+let activeTz     = detectedTz;
+let tickInterval  = null;
+let minuteTimer   = null;
+
+// ─── BOOT ─────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+  const unlocked = localStorage.getItem("volatilityMapUnlocked") === "true";
+  const savedTz  = localStorage.getItem("selectedTimezone");
+
+  if (savedTz && savedTz !== "auto") {
+    activeTz = savedTz;
+  }
+
+  if (unlocked) {
+    launchApp();
+  }
+  // else: gate stays visible
+});
+
+// ─── LAUNCH APP ───────────────────────────────────────────────
+function launchApp() {
+  document.getElementById("gate").style.display = "none";
+  const app = document.getElementById("app");
+  app.classList.add("show");
+
+  initTzSelector();
+  buildClocksGrid();
+  buildSessionCards();
+  buildVolGrid();
+  buildBestGrid();
+  buildTimeline();
+  buildStatusGrid();
+
+  tick();
+  tickInterval = setInterval(tick, 1000);
+
+  // Rebuild status/sessions every minute (open/close changes)
+  minuteTimer = setInterval(() => {
+    buildSessionCards();
+    buildStatusGrid();
+  }, 60_000);
+
+  window.addEventListener("scroll", onScroll);
+}
+
+// ─── TICK (every second) ─────────────────────────────────────
+function tick() {
+  updateMainClock();
+  updateClocks();
+  updateSessionNow();
+  updateTimelineNow();
+  onScroll();
+}
+
+// ─── SCROLL PROGRESS ─────────────────────────────────────────
+function onScroll() {
+  const el = document.getElementById("scroll-bar");
+  if (!el) return;
+  const top    = document.documentElement.scrollTop;
+  const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  el.style.width = height > 0 ? (top / height * 100) + "%" : "0%";
+}
+
+// ─── TZ SELECTOR ─────────────────────────────────────────────
+function initTzSelector() {
+  const saved = localStorage.getItem("selectedTimezone") || "auto";
+  const sel   = document.getElementById("tz-sel");
+  sel.value   = saved;
+  activeTz    = saved === "auto" ? detectedTz : saved;
+  refreshTzLabels();
+}
+
+function onTzChange(val) {
+  localStorage.setItem("selectedTimezone", val);
+  activeTz = val === "auto" ? detectedTz : val;
+  refreshTzLabels();
+  buildSessionCards();
+  buildVolGrid();
+  buildBestGrid();
+  buildTimeline();
+}
+
+function getActiveTzLabel() {
+  const sel = document.getElementById("tz-sel").value;
+  if (sel === "auto") return `Automático (${detectedTz})`;
+  return TZ_LABELS[sel] || activeTz;
+}
+
+function refreshTzLabels() {
+  const label = getActiveTzLabel();
+  const selVal = document.getElementById("tz-sel").value;
+  const dispName = TZ_LABELS[selVal === "auto" ? "auto" : selVal] || activeTz;
+
+  // TZ card
+  document.getElementById("tz-name").textContent     = dispName;
+  document.getElementById("tz-id").textContent       = activeTz;
+  document.getElementById("tz-detected").textContent = detectedTz;
+
+  // Bars
+  document.getElementById("tz-bar-label").textContent    = label;
+  document.getElementById("tz-bar-detected").textContent = detectedTz;
+
+  // Section labels
+  const labels = ["tl-tz-label","sess-tz-label","vol-tz-label","best-tz-label"];
+  labels.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = label;
+  });
+}
+
+// ─── MAIN CLOCK ──────────────────────────────────────────────
+function updateMainClock() {
+  const now = DateTime.now().setZone(activeTz);
+  document.getElementById("main-clock").textContent = now.toFormat("HH:mm:ss");
+  document.getElementById("main-date").textContent  =
+    now.toFormat("cccc, dd 'de' LLLL 'de' yyyy", { locale: "pt-BR" });
+}
+
+// ─── GLOBAL CLOCKS ───────────────────────────────────────────
+const CLOCKS_DEF = [
+  { id: "user",  city: "Seu Horário",    tz: null,                 color: "var(--green)"  },
+  { id: "ny",    city: "Miami / NY",     tz: "America/New_York",   color: "var(--purple)" },
+  { id: "br",    city: "Brasília",       tz: "America/Sao_Paulo",  color: "var(--cyan)"   },
+  { id: "lon",   city: "Londres",        tz: "Europe/London",      color: "var(--green)"  },
+  { id: "tok",   city: "Tokyo",          tz: "Asia/Tokyo",         color: "var(--orange)" },
+  { id: "syd",   city: "Sydney",         tz: "Australia/Sydney",   color: "var(--blue)"   },
+];
+
+function buildClocksGrid() {
+  const grid = document.getElementById("clocks-grid");
+  grid.innerHTML = CLOCKS_DEF.map((c, i) => `
+    <div class="card clock-card fade-up" style="animation-delay:${i * .06}s" id="clock-card-${c.id}">
+      <div class="clock-city">${c.city}</div>
+      <div class="clock-time" id="clk-${c.id}" style="color:${c.color}">--:--:--</div>
+      <div class="clock-tz" id="clk-tz-${c.id}">${c.tz || activeTz}</div>
+    </div>
+  `).join("");
+}
+
+function updateClocks() {
+  CLOCKS_DEF.forEach(c => {
+    const tz  = c.tz || activeTz;
+    const now = DateTime.now().setZone(tz);
+    const el  = document.getElementById(`clk-${c.id}`);
+    const tzEl= document.getElementById(`clk-tz-${c.id}`);
+    if (el)   el.textContent   = now.toFormat("HH:mm:ss");
+    if (tzEl && c.id === "user") tzEl.textContent = activeTz;
+
+    // Highlight if any session is open in this timezone
+    const card = document.getElementById(`clock-card-${c.id}`);
+    if (card) {
+      const isOpen = SESSIONS.some(s => s.tz === tz && isSessionOpen(s));
+      card.classList.toggle("open", isOpen);
+    }
+  });
+}
+
+// ─── SESSION UTILS ───────────────────────────────────────────
+function sessionOpenCloseUTC(sess) {
+  const open  = DateTime.now().setZone(sess.tz).set({ hour: sess.open[0],  minute: sess.open[1],  second: 0, millisecond: 0 }).toUTC();
+  const close = DateTime.now().setZone(sess.tz).set({ hour: sess.close[0], minute: sess.close[1], second: 0, millisecond: 0 }).toUTC();
+  return { open, close };
+}
+
+function isSessionOpen(sess) {
+  const now = DateTime.now().toUTC();
+  const { open, close } = sessionOpenCloseUTC(sess);
+  return now >= open && now < close;
+}
+
+function activeSessions() {
+  return SESSIONS.filter(isSessionOpen);
+}
+
+// Convert an origin-tz time to activeTz and format as HH:mm
+function fmtInActiveTz(originTz, h, m) {
+  try {
+    return DateTime.now().setZone(originTz).set({ hour: h, minute: m, second: 0, millisecond: 0 })
+      .setZone(activeTz).toFormat("HH:mm");
+  } catch { return "--:--"; }
+}
+
+// Get decimal hours (0-24) in activeTz for a given origin time
+function decimalHoursInActiveTz(originTz, h, m) {
+  const dt = DateTime.now().setZone(originTz).set({ hour: h, minute: m, second: 0, millisecond: 0 }).setZone(activeTz);
+  return dt.hour + dt.minute / 60;
+}
+
+// ─── SESSION NOW CARD ────────────────────────────────────────
+function updateSessionNow() {
+  const active = activeSessions();
+
+  const sessName  = document.getElementById("sess-name");
+  const sessMsg   = document.getElementById("sess-msg");
+  const sessIcon  = document.getElementById("sess-icon");
+  const sessBadge = document.getElementById("sess-badge");
+  const nextName  = document.getElementById("next-name");
+  const nextTime  = document.getElementById("next-time");
+  const liqLevel  = document.getElementById("liq-level");
+  const liqSub    = document.getElementById("liq-sub");
+  const navTxt    = document.getElementById("nav-session-txt");
+
+  if (active.length === 0) {
+    sessName.textContent  = "Pós-Fechamento";
+    sessMsg.textContent   = "Liquidez reduzida. Evite novas operações.";
+    sessIcon.textContent  = "🌙";
+    sessIcon.style.cssText = "background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)";
+    sessBadge.innerHTML   = `<span class="badge badge-rd"><span class="dot dot-rd"></span>Fechado</span>`;
+    liqLevel.innerHTML    = '<span style="color:var(--t3)">Baixa Liquidez</span>';
+    liqSub.textContent    = "Mercados principais fechados";
+    navTxt.textContent    = "Mercado fechado";
+  } else if (active.length >= 2) {
+    const names = active.map(s => s.name).join(" + ");
+    sessName.textContent  = names;
+    sessMsg.textContent   = "Sobreposição ativa — maior fluxo institucional e liquidez máxima do dia.";
+    sessIcon.textContent  = "⚡";
+    sessIcon.style.cssText = "background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.25)";
+    sessBadge.innerHTML   = `<span class="badge badge-au"><span class="dot dot-au"></span>Sobreposição</span>`;
+    liqLevel.innerHTML    = `<span style="color:var(--gold)">Fluxo Máximo</span>`;
+    liqSub.textContent    = "Sobreposição ativa — melhor janela do dia";
+    navTxt.textContent    = `Sobreposição: ${names}`;
+  } else {
+    const s = active[0];
+    const msgs = {
+      sydney:  "Sessão australiana aberta. Liquidez moderada para AUD e NZD.",
+      tokyo:   "Sessão asiática ativa. Importante para JPY, Nikkei e Hang Seng.",
+      london:  "Sessão londrina aberta. Alta liquidez europeia em Forex e Ouro.",
+      newyork: "Maior fluxo institucional do dia. Foco em Nasdaq, Dow Jones e Ouro.",
+    };
+    sessName.textContent  = `${s.name} aberta`;
+    sessMsg.textContent   = msgs[s.id] || "";
+    sessIcon.textContent  = s.icon;
+    sessIcon.style.cssText = `background:rgba(${colorToRgb(s.color)},.12);border:1px solid rgba(${colorToRgb(s.color)},.25)`;
+    sessBadge.innerHTML   = `<span class="badge ${s.badgeCls}"><span class="dot ${s.dotCls}"></span>Aberta</span>`;
+    const liqLevels = { sydney:"Baixa Liquidez", tokyo:"Liquidez Normal", london:"Alta Liquidez", newyork:"Fluxo Institucional" };
+    const liqSubs   = { sydney:"Foco em AUD e NZD", tokyo:"Mercado asiático ativo", london:"Europa em plena atividade", newyork:"Principal sessão do dia" };
+    liqLevel.textContent = liqLevels[s.id] || "";
+    liqSub.textContent   = liqSubs[s.id] || "";
+    navTxt.textContent   = `${s.name} aberta`;
+  }
+
+  // Next session
+  findNextSession(nextName, nextTime);
+}
+
+function findNextSession(nameEl, timeEl) {
+  const now  = DateTime.now().toUTC().toMillis();
+  let best   = null, bestDiff = Infinity;
+
+  SESSIONS.forEach(s => {
+    if (isSessionOpen(s)) return;
+    const { open } = sessionOpenCloseUTC(s);
+    let diff = open.toMillis() - now;
+    if (diff < 0) diff += 86_400_000; // next day
+    if (diff < bestDiff) { bestDiff = diff; best = { s, diff, open }; }
+  });
+
+  if (best) {
+    const h    = Math.floor(best.diff / 3_600_000);
+    const m    = Math.floor((best.diff % 3_600_000) / 60_000);
+    const time = best.open.setZone(activeTz).toFormat("HH:mm");
+    nameEl.textContent = best.s.name;
+    timeEl.textContent = `Em ${h}h ${m}min · Abre às ${time}`;
+  }
+}
+
+// ─── BUILD SESSION CARDS ─────────────────────────────────────
+function buildSessionCards() {
+  const grid = document.getElementById("sess-grid");
+  grid.innerHTML = SESSIONS.map((s, i) => {
+    const openFmt  = fmtInActiveTz(s.tz, s.open[0],  s.open[1]);
+    const closeFmt = fmtInActiveTz(s.tz, s.close[0], s.close[1]);
+    const open     = isSessionOpen(s);
+
+    return `
+      <div class="card session-card card-lift ${open ? s.glowClass : ""} ${s.accentClass} fade-up" style="animation-delay:${i*.07}s;position:relative">
+        <div class="sess-flag">${s.flag} ${s.icon}</div>
+        <div class="sess-name">${s.name}</div>
+        <div class="sess-hours" style="color:${s.color}">${openFmt} – ${closeFmt}</div>
+        <div class="sess-status">
+          ${open
+            ? `<span class="badge ${s.badgeCls}"><span class="dot ${s.dotCls}"></span>Aberta Agora</span>`
+            : `<span class="badge badge-off">Fechada</span>`
+          }
+        </div>
+        <div class="sess-desc">${s.desc}</div>
+        <div class="sess-tags">${s.assets.map(a => `<span class="tag">${a}</span>`).join("")}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+// ─── BUILD VOLATILITY GRID ───────────────────────────────────
+function buildVolGrid() {
+  const grid = document.getElementById("vol-grid");
+  grid.innerHTML = VOL_WINDOWS.map((v, i) => {
+    const s = fmtInActiveTz(v.originTz, v.start[0], v.start[1]);
+    const e = fmtInActiveTz(v.originTz, v.end[0],   v.end[1]);
+    return `
+      <div class="card vol-card card-lift ${v.accentClass} fade-up" style="animation-delay:${i*.07}s;position:relative">
+        <div class="vol-icon">${v.icon}</div>
+        <div class="vol-badge"><span class="badge ${v.badgeCls}">${v.intensity}</span></div>
+        <div class="vol-name">${v.name}</div>
+        <div class="vol-time" style="color:${v.color}">${s} – ${e}</div>
+        <div class="vol-desc">${v.desc}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+// ─── BUILD BEST HOURS ────────────────────────────────────────
+function buildBestGrid() {
+  const grid = document.getElementById("best-grid");
+  grid.innerHTML = BEST_HOURS.map((b, i) => {
+    const s = fmtInActiveTz(b.originTz, b.start[0], b.start[1]);
+    const e = fmtInActiveTz(b.originTz, b.end[0],   b.end[1]);
+    return `
+      <div class="card best-card card-lift fade-up" style="animation-delay:${i*.07}s;position:relative">
+        <div class="best-rank" style="color:${b.color}">${b.rank}</div>
+        <div class="best-icon">${b.icon}</div>
+        <div class="best-name">${b.name}</div>
+        <div class="best-time">${s} – ${e}</div>
+        <div class="best-desc">${b.desc}</div>
+        <div class="best-tags">${b.tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>
+        <div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,${b.afterBg},transparent);opacity:.5"></div>
+      </div>
+    `;
+  }).join("");
+}
+
+// ─── BUILD STATUS GRID ───────────────────────────────────────
+function buildStatusGrid() {
+  const active    = activeSessions();
+  const isOverlap = active.length >= 2;
+  const hasNY     = active.some(s => s.id === "newyork");
+  const hasLon    = active.some(s => s.id === "london");
+  const hasTok    = active.some(s => s.id === "tokyo");
+  const hasSyd    = active.some(s => s.id === "sydney");
+  const noSess    = active.length === 0;
+
+  const items = [
+    { label: "Baixa Liquidez",          color: "#3a3a5c", glow: false, on: noSess && !isOverlap },
+    { label: "Liquidez Normal",         color: "var(--blue)",   glow: true,  on: (hasSyd || hasTok) && active.length === 1 },
+    { label: "Alta Liquidez",           color: "var(--green)",  glow: true,  on: hasLon && active.length === 1 },
+    { label: "Fluxo Institucional",     color: "var(--purple)", glow: true,  on: hasNY && !isOverlap },
+    { label: "Sobreposição Ativa",      color: "var(--gold)",   glow: true,  on: isOverlap },
+    { label: "Mercado Fechado",         color: "#3a3a5c", glow: false, on: noSess },
+  ];
+
+  const grid = document.getElementById("status-grid");
+  grid.innerHTML = items.map(item => `
+    <div class="card status-card" style="${item.on ? `border-color:${item.color}40;background:${item.color}08` : ""}">
+      <div class="status-disc" style="background:${item.on ? item.color : "#1a1a2e"};${item.on && item.glow ? `box-shadow:0 0 8px ${item.color}` : ""}"></div>
+      <div>
+        <div class="status-txt" style="color:${item.on ? item.color : "var(--t3)"}">${item.label}</div>
+        <div class="status-sub">${item.on ? "● Ativo" : "○ Inativo"}</div>
+      </div>
+    </div>
+  `).join("");
+}
+
+// ─── BUILD TIMELINE ──────────────────────────────────────────
+function buildTimeline() {
+  const inner = document.getElementById("tl-inner");
+
+  // Hour labels (00 03 06 09 12 15 18 21) — these are positions on a 24h grid
+  const hourLabels = Array.from({ length: 8 }, (_, i) => {
+    const h = i * 3;
+    return `<div class="tl-hour">${String(h).padStart(2,"0")}h</div>`;
+  });
+
+  let html = `
+    <div class="tl-hour-row">${hourLabels.join("")}</div>
+    <div style="position:relative">
+      <div class="tl-grid">${Array(8).fill('<div class="tl-grid-line"></div>').join("")}</div>
+      <div class="tl-rows">
+  `;
+
+  SESSIONS.forEach(s => {
+    html += `
+      <div class="tl-row">
+        <div class="tl-row-label">${s.flag} ${s.name}</div>
+        <div class="tl-track" id="tl-track-${s.id}"></div>
+      </div>
+    `;
+  });
+
+  html += `</div></div>`;
+  inner.innerHTML = html;
+
+  renderTimelineBars();
+}
+
+function renderTimelineBars() {
+  SESSIONS.forEach(s => {
+    const track = document.getElementById(`tl-track-${s.id}`);
+    if (!track) return;
+
+    // Get open/close in decimal hours within activeTz
+    const openH  = decimalHoursInActiveTz(s.tz, s.open[0],  s.open[1]);
+    const closeH = decimalHoursInActiveTz(s.tz, s.close[0], s.close[1]);
+
+    track.innerHTML = "";
+
+    if (closeH > openH) {
+      // Normal: same day
+      track.innerHTML = makeBar(s, openH, closeH - openH);
+    } else {
+      // Wraps midnight in activeTz — two bars
+      track.innerHTML =
+        makeBar(s, openH, 24 - openH) +
+        makeBar(s, 0, closeH);
+    }
+
+    // Overlap zone (London + NY overlap, drawn on the NY track)
+    if (s.id === "newyork") {
+      const lonOpenH  = decimalHoursInActiveTz("Europe/London",   8,  0);
+      const nyOpenH   = decimalHoursInActiveTz("America/New_York", 9, 30);
+      const nyClose12 = decimalHoursInActiveTz("America/New_York", 12, 0);
+
+      const ovStart = Math.max(lonOpenH, nyOpenH);
+      const ovEnd   = nyClose12;
+
+      if (ovEnd > ovStart) {
+        const olEl = document.createElement("div");
+        olEl.className = "tl-overlap";
+        olEl.style.left  = pct(ovStart) + "%";
+        olEl.style.width = pct(ovEnd - ovStart) + "%";
+        track.appendChild(olEl);
+      }
+    }
+  });
+}
+
+function makeBar(s, startH, durationH) {
+  const left  = pct(startH);
+  const width = pct(durationH);
+  return `<div class="tl-bar ${s.barClass}" style="left:${left}%;width:${width}%"></div>`;
+}
+
+function pct(h) { return Math.min(100, Math.max(0, (h / 24) * 100)).toFixed(3); }
+
+function updateTimelineNow() {
+  SESSIONS.forEach(s => {
+    const track = document.getElementById(`tl-track-${s.id}`);
+    if (!track) return;
+
+    const now = DateTime.now().setZone(activeTz);
+    const nowH = now.hour + now.minute / 60 + now.second / 3600;
+    const pos  = pct(nowH);
+
+    let line = track.querySelector(".tl-now-line");
+    if (!line) {
+      line = document.createElement("div");
+      line.className = "tl-now-line";
+      track.appendChild(line);
+    }
+    line.style.left = pos + "%";
+  });
+}
+
+// ─── LEAD SUBMIT ─────────────────────────────────────────────
+async function submitLead() {
+  const name     = document.getElementById("f-name").value.trim();
+  const email    = document.getElementById("f-email").value.trim();
+  const whatsapp = document.getElementById("f-wa").value.trim();
+  const errEl    = document.getElementById("form-err");
+  const btn      = document.getElementById("btn-submit");
+
+  errEl.style.display = "none";
+
+  if (!name)                  return showErr("Por favor, informe seu nome.");
+  if (!email.includes("@"))   return showErr("Por favor, informe um e-mail válido.");
+  if (whatsapp.replace(/\D/g,"").length < 8)
+                              return showErr("Por favor, informe seu WhatsApp com DDD.");
+
+  // Loading
+  btn.classList.add("btn-loading");
+  btn.innerHTML = '<div class="spinner"></div>&nbsp;Liberando acesso...';
+
+  // Collect TZ info
+  const detected    = detectedTz;
+  const countryHint = COUNTRY_HINTS[detected] || detected.split("/")[0];
+
+  // Save to Supabase
+  try {
+    if (sb && SB_CONFIGURED) {
+      const { error } = await sb.from("leads_market_sessions").insert([{
+        name,
+        email,
+        whatsapp,
+        detected_timezone:  detected,
+        selected_timezone:  detected,
+        timezone_label:     TZ_LABELS[detected] || detected,
+        country_hint:       countryHint,
+        user_agent:         navigator.userAgent,
+        lead_source:        "mapa_volatilidade_global",
+      }]);
+      if (error) console.warn("Supabase insert error:", error);
+    }
+  } catch(e) { console.warn("Supabase error (proceeding anyway):", e); }
+
+  // Unlock regardless of Supabase result
+  localStorage.setItem("volatilityMapUnlocked", "true");
+
+  // Smooth transition
+  const gate = document.getElementById("gate");
+  gate.style.transition = "opacity .45s ease";
+  gate.style.opacity    = "0";
+
+  setTimeout(launchApp, 480);
+}
+
+function showErr(msg) {
+  const el = document.getElementById("form-err");
+  el.textContent    = msg;
+  el.style.display  = "block";
+  const btn = document.getElementById("btn-submit");
+  btn.classList.remove("btn-loading");
+  btn.innerHTML = 'LIBERAR ACESSO GRATUITO <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,18 15,12 9,6"/></svg>';
+}
+
+// ─── UTIL ─────────────────────────────────────────────────────
+// Quick CSS var → approximate RGB for inline alpha (rough, enough for glow)
+function colorToRgb(cssVar) {
+  const map = {
+    "var(--green)":  "0,232,122",
+    "var(--blue)":   "26,127,255",
+    "var(--purple)": "124,58,237",
+    "var(--gold)":   "245,197,24",
+    "var(--orange)": "249,115,22",
+    "var(--red)":    "239,68,68",
+    "var(--cyan)":   "34,211,238",
+  };
+  return map[cssVar] || "255,255,255";
+}
+</script>
+</body>
+</html>
