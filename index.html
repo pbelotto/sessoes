@@ -616,37 +616,62 @@
       letter-spacing: .05em;
     }
 
-    /* ── HERO ── */
-    .hero {
-      padding: 56px 0 36px;
-      text-align: center;
+    /* ── MARKET STATUS BANNER ── */
+    .mkt-banner {
+      width: 100%;
+      padding: 9px 0;
+      background: rgba(7,7,15,.82);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .mkt-banner-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between; gap: 14px;
+      flex-wrap: wrap;
+    }
+    .mkt-status {
+      display: flex; align-items: center; gap: 9px;
+      font-size: 11.5px; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+    }
+    .mkt-status-label { color: var(--t1); }
+    .mkt-sessions-detail {
+      color: var(--t2); font-size: 11px; font-weight: 400;
+      letter-spacing: .01em; text-transform: none;
+    }
+    .mkt-right { display: flex; align-items: center; gap: 16px; }
+    .mkt-time {
+      font-family: "SF Mono","Fira Code",monospace;
+      font-size: 12px; color: var(--t2); letter-spacing: .04em;
+    }
+    .mkt-tz-small { font-size: 10.5px; color: var(--t3); letter-spacing: .03em; }
+
+    /* ── PAGE HEADER (compact hero) ── */
+    .page-header {
+      padding: 36px 0 24px;
       position: relative;
     }
-
-    .hero::before {
+    .page-header::before {
       content: '';
       position: absolute;
-      top: 0; left: 50%;
-      transform: translateX(-50%);
-      width: 700px; height: 280px;
-      background: radial-gradient(ellipse, rgba(0,232,122,.07) 0%, transparent 65%);
+      top: 0; left: 0;
+      width: 500px; height: 180px;
+      background: radial-gradient(ellipse at left, rgba(0,232,122,.06) 0%, transparent 65%);
       pointer-events: none;
     }
-
-    .hero h1 {
-      font-size: clamp(30px, 5.5vw, 58px);
+    .page-header h1 {
+      font-size: clamp(26px, 4.5vw, 48px);
       font-weight: 900;
-      letter-spacing: -.05em;
-      line-height: 1.04;
-      margin-bottom: 14px;
+      letter-spacing: -.04em;
+      line-height: 1.06;
+      margin: 6px 0 10px;
     }
-
-    .hero-sub {
-      font-size: clamp(14px, 2vw, 17px);
+    .page-header-sub {
+      font-size: clamp(13px, 1.6vw, 15px);
       color: var(--t2);
-      max-width: 580px;
-      margin: 0 auto;
-      line-height: 1.72;
+      max-width: 620px;
+      line-height: 1.7;
     }
 
     /* ── TZ INFO BAR ── */
@@ -1402,10 +1427,6 @@
 
       <!-- Right -->
       <div class="nav-right">
-        <div class="nav-live" id="nav-live">
-          <span class="dot dot-g"></span>
-          <span id="nav-session-txt" style="font-size:12px;color:var(--t2)">Carregando...</span>
-        </div>
         <span class="nav-tz-label">Visualizar em:</span>
         <div class="tz-select-wrap">
           <select class="tz-select" id="tz-sel" onchange="onTzChange(this.value)">
@@ -1425,23 +1446,36 @@
     </div>
   </nav>
 
-  <!-- ── HERO ── -->
-  <section class="hero">
-    <div class="wrap">
-      <div class="eyebrow fade-up">Belotto Trader · Paulo Belotto · Clube do Gain</div>
-      <h1 class="grad-text fade-up d1">Mapa de Volatilidade<br>Global</h1>
-      <p class="hero-sub fade-up d2">
-        Sessões abertas, sobreposições institucionais, janelas de liquidez e os melhores
-        momentos para operar — todos convertidos para o seu fuso horário.
-      </p>
+  <!-- ── MARKET STATUS BANNER ── -->
+  <div class="mkt-banner">
+    <div class="mkt-banner-inner">
+      <div class="mkt-status">
+        <span class="dot dot-rd" id="mkt-dot"></span>
+        <span class="mkt-status-label" id="mkt-status-label">MERCADO FECHADO</span>
+        <span class="mkt-sessions-detail" id="mkt-sessions-detail"></span>
+      </div>
+      <div class="mkt-right">
+        <span class="mkt-time mono" id="mkt-time">--:--:--</span>
+        <span class="mkt-tz-small" id="mkt-tz-small">—</span>
+      </div>
     </div>
-  </section>
+  </div>
 
   <!-- ── CONTAINER ── -->
   <div class="wrap">
 
+    <!-- ── PAGE HEADER ── -->
+    <div class="page-header fade-up">
+      <div class="eyebrow">Belotto Trader · Paulo Belotto · Clube do Gain</div>
+      <h1 class="grad-text">Mapa de Volatilidade<br>Global</h1>
+      <p class="page-header-sub">
+        Sessões abertas, sobreposições institucionais, janelas de liquidez e os melhores
+        momentos para operar — todos convertidos para o seu fuso horário.
+      </p>
+    </div>
+
     <!-- TZ INFO BAR -->
-    <div class="tz-bar fade-up d3">
+    <div class="tz-bar fade-up d1">
       <span>
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
         Exibindo em: <strong id="tz-bar-label">—</strong>
@@ -1451,31 +1485,31 @@
       </span>
     </div>
 
-    <!-- ── TZ CARD ── -->
-    <section class="section">
-      <div class="card glow-g tz-card fade-up" style="position:relative;overflow:hidden">
-        <div>
-          <div class="tz-card-label">Fuso Ativo</div>
-          <div class="tz-card-name" id="tz-name">—</div>
-          <div class="tz-card-id" id="tz-id">—</div>
-          <div class="tz-card-detected">Detectado: <span id="tz-detected">—</span></div>
-        </div>
-        <div>
-          <div class="tz-main-time mono" id="main-clock">--:--:--</div>
-          <div class="tz-main-date" id="main-date">—</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── GLOBAL CLOCKS ── -->
+    <!-- ── 24H TIMELINE (first section) ── -->
     <section class="section">
       <div class="section-header fade-up">
-        <div class="eyebrow">Relógios Globais</div>
-        <h2>Hora ao redor do mundo</h2>
-        <p>Atualização em tempo real · a cada segundo</p>
+        <div class="eyebrow">Linha do Tempo</div>
+        <h2>24 horas — Sessões Globais</h2>
+        <p>Visualize onde cada bolsa está aberta. Horário local: <strong id="tl-tz-label" style="color:var(--t1)">—</strong></p>
       </div>
-      <div class="clocks-grid" id="clocks-grid">
-        <!-- JS populated -->
+
+      <div class="card timeline-card fade-up d1">
+        <div class="timeline-scroll">
+          <div class="timeline-inner" id="tl-inner">
+            <!-- JS populated -->
+          </div>
+        </div>
+
+        <div class="tl-legend">
+          <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(26,127,255,.7)"></div>Sydney</div>
+          <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(249,115,22,.7)"></div>Tokyo</div>
+          <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(0,232,122,.7)"></div>Londres</div>
+          <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(124,58,237,.7)"></div>New York</div>
+          <div class="tl-legend-item"><div class="tl-legend-overlap"></div>Sobreposição Londres+NY</div>
+          <div class="tl-legend-item" style="color:rgba(255,255,255,.5);font-size:11px">
+            <div style="width:2px;height:12px;background:rgba(255,255,255,.7);border-radius:1px"></div>Agora
+          </div>
+        </div>
       </div>
     </section>
 
@@ -1520,31 +1554,31 @@
 
     <div class="divider"></div>
 
-    <!-- ── 24H TIMELINE ── -->
+    <!-- ── TZ CARD ── -->
+    <section class="section">
+      <div class="card glow-g tz-card fade-up" style="position:relative;overflow:hidden">
+        <div>
+          <div class="tz-card-label">Fuso Ativo</div>
+          <div class="tz-card-name" id="tz-name">—</div>
+          <div class="tz-card-id" id="tz-id">—</div>
+          <div class="tz-card-detected">Detectado: <span id="tz-detected">—</span></div>
+        </div>
+        <div>
+          <div class="tz-main-time mono" id="main-clock">--:--:--</div>
+          <div class="tz-main-date" id="main-date">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── GLOBAL CLOCKS ── -->
     <section class="section">
       <div class="section-header fade-up">
-        <div class="eyebrow">Linha do Tempo</div>
-        <h2>24 horas — Sessões Globais</h2>
-        <p>Visualize onde cada bolsa está aberta. Horário local: <strong id="tl-tz-label" style="color:var(--t1)">—</strong></p>
+        <div class="eyebrow">Relógios Globais</div>
+        <h2>Hora ao redor do mundo</h2>
+        <p>Atualização em tempo real · a cada segundo</p>
       </div>
-
-      <div class="card timeline-card fade-up d1">
-        <div class="timeline-scroll">
-          <div class="timeline-inner" id="tl-inner">
-            <!-- JS populated -->
-          </div>
-        </div>
-
-        <div class="tl-legend">
-          <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(26,127,255,.7)"></div>Sydney</div>
-          <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(249,115,22,.7)"></div>Tokyo</div>
-          <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(0,232,122,.7)"></div>Londres</div>
-          <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(124,58,237,.7)"></div>New York</div>
-          <div class="tl-legend-item"><div class="tl-legend-overlap"></div>Sobreposição Londres+NY</div>
-          <div class="tl-legend-item" style="color:rgba(255,255,255,.5);font-size:11px">
-            <div style="width:2px;height:12px;background:rgba(255,255,255,.7);border-radius:1px"></div>Agora
-          </div>
-        </div>
+      <div class="clocks-grid" id="clocks-grid">
+        <!-- JS populated -->
       </div>
     </section>
 
@@ -1616,7 +1650,7 @@
           Participe das salas ao vivo e acompanhe o mercado em tempo real.<br>
           Análises, entradas e gestão de risco ao vivo — todos os dias.
         </p>
-        <a href="https://SEU-LINK-AQUI.com" target="_blank" rel="noopener" class="btn btn-cta">
+        <a href="https://belottotrader.com.br/comunidade" target="_blank" rel="noopener" class="btn btn-cta">
           ENTRAR NA SALA AO VIVO
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,18 15,12 9,6"/></svg>
         </a>
@@ -1941,7 +1975,42 @@ function tick() {
   updateClocks();
   updateSessionNow();
   updateTimelineNow();
+  updateMarketBanner();
   onScroll();
+}
+
+// ─── MARKET STATUS BANNER ────────────────────────────────────
+function updateMarketBanner() {
+  const active   = activeSessions();
+  const dot      = document.getElementById("mkt-dot");
+  const label    = document.getElementById("mkt-status-label");
+  const detail   = document.getElementById("mkt-sessions-detail");
+  const timeEl   = document.getElementById("mkt-time");
+  const tzSmall  = document.getElementById("mkt-tz-small");
+
+  if (!dot) return;
+
+  const now = DateTime.now().setZone(activeTz);
+  if (timeEl) timeEl.textContent = now.toFormat("HH:mm:ss");
+  if (tzSmall) tzSmall.textContent = activeTz;
+
+  if (active.length === 0) {
+    dot.className   = "dot dot-rd";
+    label.textContent = "MERCADO FECHADO";
+    label.style.color = "var(--red)";
+    detail.textContent = "";
+  } else if (active.length >= 2) {
+    dot.className   = "dot dot-au";
+    label.textContent = "SOBREPOSIÇÃO ATIVA";
+    label.style.color = "var(--gold)";
+    detail.textContent = "— " + active.map(s => s.name).join(" + ") + " — Maior liquidez do dia";
+  } else {
+    dot.className   = "dot dot-g";
+    label.textContent = active[0].name.toUpperCase() + " ABERTA";
+    label.style.color = active[0].color;
+    const liqMap = { sydney:"Liquidez baixa", tokyo:"Liquidez normal", london:"Alta liquidez", newyork:"Fluxo institucional" };
+    detail.textContent = "— " + (liqMap[active[0].id] || "");
+  }
 }
 
 // ─── SCROLL PROGRESS ─────────────────────────────────────────
@@ -2091,6 +2160,7 @@ function updateSessionNow() {
   const liqLevel  = document.getElementById("liq-level");
   const liqSub    = document.getElementById("liq-sub");
   const navTxt    = document.getElementById("nav-session-txt");
+  const safeNav   = (t) => { if (navTxt) navTxt.textContent = t; };
 
   if (active.length === 0) {
     sessName.textContent  = "Pós-Fechamento";
@@ -2100,7 +2170,7 @@ function updateSessionNow() {
     sessBadge.innerHTML   = `<span class="badge badge-rd"><span class="dot dot-rd"></span>Fechado</span>`;
     liqLevel.innerHTML    = '<span style="color:var(--t3)">Baixa Liquidez</span>';
     liqSub.textContent    = "Mercados principais fechados";
-    navTxt.textContent    = "Mercado fechado";
+    safeNav("Mercado fechado");
   } else if (active.length >= 2) {
     const names = active.map(s => s.name).join(" + ");
     sessName.textContent  = names;
@@ -2110,7 +2180,7 @@ function updateSessionNow() {
     sessBadge.innerHTML   = `<span class="badge badge-au"><span class="dot dot-au"></span>Sobreposição</span>`;
     liqLevel.innerHTML    = `<span style="color:var(--gold)">Fluxo Máximo</span>`;
     liqSub.textContent    = "Sobreposição ativa — melhor janela do dia";
-    navTxt.textContent    = `Sobreposição: ${names}`;
+    safeNav(`Sobreposição: ${names}`);
   } else {
     const s = active[0];
     const msgs = {
@@ -2128,7 +2198,7 @@ function updateSessionNow() {
     const liqSubs   = { sydney:"Foco em AUD e NZD", tokyo:"Mercado asiático ativo", london:"Europa em plena atividade", newyork:"Principal sessão do dia" };
     liqLevel.textContent = liqLevels[s.id] || "";
     liqSub.textContent   = liqSubs[s.id] || "";
-    navTxt.textContent   = `${s.name} aberta`;
+    safeNav(`${s.name} aberta`);
   }
 
   // Next session
