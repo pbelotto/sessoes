@@ -646,55 +646,49 @@
       font-family: "SF Mono","Fira Code",monospace;
     }
 
-    /* ── PAGE HEADER (compact) ── */
-    .page-header {
-      padding: 28px 0 20px;
-      position: relative;
+    /* ── NAV LOGO — always visible name next to image ── */
+    .nav-logo { display: flex; align-items: center; gap: 9px; cursor: default; }
+    .nav-logo img { height: 28px; width: auto; display: block; }
+    .nav-logo-name {
+      display: flex; align-items: center;
+      font-size: 13px; font-weight: 900; letter-spacing: -.01em; gap: 0;
     }
-    .page-header::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0;
-      width: 400px; height: 140px;
-      background: radial-gradient(ellipse at left, rgba(0,232,122,.05) 0%, transparent 65%);
-      pointer-events: none;
+    .nav-logo-name span:first-child {
+      background: linear-gradient(135deg, var(--green), var(--blue));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-    .page-header h1 {
-      font-size: clamp(22px, 4vw, 40px);
-      font-weight: 900;
-      letter-spacing: -.04em;
-      line-height: 1.08;
-      margin: 5px 0 8px;
-    }
-    .page-header-sub {
-      font-size: clamp(13px, 1.6vw, 14.5px);
-      color: var(--t2);
-      max-width: 580px;
-      line-height: 1.65;
-    }
+    .nav-logo-name span:last-child { color: var(--t3); font-weight: 400; }
 
-    /* ── NAV LOGO FALLBACK (better look without logo.png) ── */
+    /* ── NAV LOGO FALLBACK (when logo.png is missing) ── */
     .nav-logo-fb {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 13px;
-      font-weight: 900;
-      letter-spacing: -.01em;
+      display: flex; align-items: center; gap: 7px;
+      font-size: 13px; font-weight: 900; letter-spacing: -.01em;
     }
     .nav-logo-mark {
       width: 22px; height: 22px;
       background: linear-gradient(135deg, var(--green), var(--blue));
-      border-radius: 6px;
-      flex-shrink: 0;
+      border-radius: 6px; flex-shrink: 0;
     }
     .nav-logo-fb span:first-of-type {
       background: linear-gradient(135deg, var(--green), var(--blue));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
     .nav-logo-fb span:last-of-type { color: var(--t3); font-weight: 400; }
+
+    /* ── TOOL INFO BAR (compact title strip) ── */
+    .tool-info-bar {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 20px; padding: 20px 0 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .tool-info-title {
+      font-size: clamp(15px, 2.2vw, 19px);
+      font-weight: 800; letter-spacing: -.03em;
+      color: var(--t1); margin-bottom: 5px;
+    }
+    .tool-info-sub {
+      font-size: 12.5px; color: var(--t3); line-height: 1.55; max-width: 600px;
+    }
 
     /* ============================================================
        RESPONSIVE — Mobile-first comprehensive overhaul
@@ -733,10 +727,10 @@
       .tl-legend { gap: 10px; margin-top: 14px; }
       .tl-legend-item { font-size: 11px; gap: 5px; }
 
-      /* Page header */
-      .page-header { padding: 20px 0 14px; }
-      .page-header h1 { font-size: clamp(20px, 6vw, 30px); margin-bottom: 6px; }
-      .page-header-sub { font-size: 13px; }
+      /* Tool info bar */
+      .tool-info-bar { flex-wrap: wrap; padding: 14px 0 12px; gap: 10px; }
+      .tool-info-title { font-size: 15px; }
+      .tool-info-sub { font-size: 11.5px; }
 
       /* Wrap padding */
       .wrap { padding: 0 16px; }
@@ -828,33 +822,6 @@
       font-size: 12px; color: var(--t2); letter-spacing: .04em;
     }
     .mkt-tz-small { font-size: 10.5px; color: var(--t3); letter-spacing: .03em; }
-
-    /* ── PAGE HEADER (compact hero) ── */
-    .page-header {
-      padding: 36px 0 24px;
-      position: relative;
-    }
-    .page-header::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0;
-      width: 500px; height: 180px;
-      background: radial-gradient(ellipse at left, rgba(0,232,122,.06) 0%, transparent 65%);
-      pointer-events: none;
-    }
-    .page-header h1 {
-      font-size: clamp(26px, 4.5vw, 48px);
-      font-weight: 900;
-      letter-spacing: -.04em;
-      line-height: 1.06;
-      margin: 6px 0 10px;
-    }
-    .page-header-sub {
-      font-size: clamp(13px, 1.6vw, 15px);
-      color: var(--t2);
-      max-width: 620px;
-      line-height: 1.7;
-    }
 
     /* ── TZ INFO BAR ── */
     .tz-bar {
@@ -1571,8 +1538,11 @@
 
       <!-- Logo -->
       <div class="nav-logo">
-        <img src="logo.png" alt="Belotto Trader" id="nav-img"
-             onerror="document.getElementById('nav-img').style.display='none';document.getElementById('nav-logo-fb').style.display='block'">
+        <img src="logo.png" alt="" id="nav-img"
+             onerror="this.style.display='none';document.getElementById('nav-logo-fb').style.display='flex';document.getElementById('nav-logo-name').style.display='none'">
+        <div class="nav-logo-name" id="nav-logo-name">
+          <span>BELOTTO</span><span> TRADER</span>
+        </div>
         <div id="nav-logo-fb" style="display:none" class="nav-logo-fb">
           <div class="nav-logo-mark"></div>
           <span>BELOTTO</span><span> TRADER</span>
@@ -1649,24 +1619,20 @@
   <!-- ── CONTEÚDO PRINCIPAL ── -->
   <div class="wrap">
 
-    <!-- ── PAGE HEADER (compact) ── -->
-    <div class="page-header fade-up">
-      <div class="eyebrow">Belotto Trader · Clube do Gain</div>
-      <h1 class="grad-text">Mapa de Volatilidade Global</h1>
-      <p class="page-header-sub">
-        Sessões abertas, sobreposições institucionais, janelas de liquidez e os melhores
-        momentos para operar — todos convertidos para o seu fuso horário.
-      </p>
+    <!-- ── TOOL INFO BAR (compact title) ── -->
+    <div class="tool-info-bar fade-up">
+      <div class="tool-info-left">
+        <div class="tool-info-title">Mapa de Volatilidade Global</div>
+        <div class="tool-info-sub">Sessões globais em tempo real · sobreposições institucionais · janelas de liquidez · horários convertidos automaticamente para o seu fuso.</div>
+      </div>
+      <span class="badge badge-g" style="flex-shrink:0;align-self:flex-start;margin-top:2px">Gratuito</span>
     </div>
-
-    <div class="divider"></div>
 
     <!-- ── SESSION STATUS ── -->
     <section class="section">
       <div class="section-header fade-up">
-        <div class="eyebrow">Status Operacional</div>
-        <h2>Sessão ativa agora</h2>
-        <p>Calculado automaticamente com base no horário atual</p>
+        <div class="eyebrow">Agora</div>
+        <h2>Sessão ativa</h2>
       </div>
       <div class="session-grid">
 
