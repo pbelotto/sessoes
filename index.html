@@ -616,7 +616,189 @@
       letter-spacing: .05em;
     }
 
-    /* ── MARKET STATUS BANNER ── */
+    /* ── TIMELINE HERO (full-width strip below market banner) ── */
+    .tl-hero {
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,.012);
+      padding: 0 0 4px;
+    }
+    .tl-hero .wrap { padding-top: 16px; padding-bottom: 20px; }
+    .tl-hero .timeline-card { margin-top: 0; }
+
+    .tl-hero-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .tl-hero-eyebrow {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--green);
+    }
+    .tl-hero-tz {
+      font-size: 11px;
+      color: var(--t3);
+      font-family: "SF Mono","Fira Code",monospace;
+    }
+
+    /* ── PAGE HEADER (compact) ── */
+    .page-header {
+      padding: 28px 0 20px;
+      position: relative;
+    }
+    .page-header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 400px; height: 140px;
+      background: radial-gradient(ellipse at left, rgba(0,232,122,.05) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .page-header h1 {
+      font-size: clamp(22px, 4vw, 40px);
+      font-weight: 900;
+      letter-spacing: -.04em;
+      line-height: 1.08;
+      margin: 5px 0 8px;
+    }
+    .page-header-sub {
+      font-size: clamp(13px, 1.6vw, 14.5px);
+      color: var(--t2);
+      max-width: 580px;
+      line-height: 1.65;
+    }
+
+    /* ── NAV LOGO FALLBACK (better look without logo.png) ── */
+    .nav-logo-fb {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: -.01em;
+    }
+    .nav-logo-mark {
+      width: 22px; height: 22px;
+      background: linear-gradient(135deg, var(--green), var(--blue));
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+    .nav-logo-fb span:first-of-type {
+      background: linear-gradient(135deg, var(--green), var(--blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .nav-logo-fb span:last-of-type { color: var(--t3); font-weight: 400; }
+
+    /* ============================================================
+       RESPONSIVE — Mobile-first comprehensive overhaul
+    ============================================================ */
+    @media (max-width: 900px) {
+      .clocks-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    @media (max-width: 640px) {
+      /* Nav */
+      .nav { padding: 10px 0; }
+      .nav-tz-label { display: none; }
+      .nav-logo img { height: 26px; }
+      .tz-select { font-size: 13px; padding: 6px 28px 6px 10px; }
+
+      /* Market status banner */
+      .mkt-banner { padding: 8px 0; }
+      .mkt-banner-inner { flex-direction: column; align-items: flex-start; gap: 4px; }
+      .mkt-status { gap: 7px; }
+      .mkt-status-label { font-size: 11px; }
+      .mkt-sessions-detail { font-size: 10px; }
+      .mkt-right { gap: 10px; }
+      .mkt-time { font-size: 11.5px; }
+      .mkt-tz-small { font-size: 10px; }
+
+      /* Timeline hero */
+      .tl-hero .wrap { padding-top: 12px; padding-bottom: 14px; }
+      .timeline-card { padding: 14px 12px; }
+      .timeline-inner { min-width: 520px; }
+      .tl-track { height: 26px; }
+      .tl-bar { font-size: 8px; height: 22px; top: 2px; }
+      .tl-row-label { width: 64px; font-size: 10px; padding-right: 8px; }
+      .tl-hour { font-size: 8.5px; }
+      .tl-hour-row { padding-left: 64px; }
+      .tl-grid { left: 64px; }
+      .tl-legend { gap: 10px; margin-top: 14px; }
+      .tl-legend-item { font-size: 11px; gap: 5px; }
+
+      /* Page header */
+      .page-header { padding: 20px 0 14px; }
+      .page-header h1 { font-size: clamp(20px, 6vw, 30px); margin-bottom: 6px; }
+      .page-header-sub { font-size: 13px; }
+
+      /* Wrap padding */
+      .wrap { padding: 0 16px; }
+
+      /* Cards */
+      .clocks-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .clock-card { padding: 16px 12px; }
+      .clock-city { font-size: 11px; }
+      .clock-time { font-size: 22px; }
+      .clock-tz { font-size: 9.5px; }
+
+      /* Session grid */
+      .session-grid { grid-template-columns: 1fr; gap: 10px; }
+      .session-now-card { flex-direction: column; text-align: center; gap: 14px; padding: 20px; }
+      .session-badge-pos { position: static; }
+      .session-name { font-size: 18px; }
+      .session-msg { font-size: 13px; }
+      .stat-mini { padding: 16px 18px; }
+      .stat-mini-val { font-size: 18px; }
+
+      /* TZ card */
+      .tz-card { grid-template-columns: 1fr; padding: 20px; }
+      .tz-main-time { text-align: left; font-size: 34px; }
+      .tz-main-date { text-align: left; font-size: 12px; }
+
+      /* Session cards */
+      .sessions-grid { grid-template-columns: 1fr; }
+      .session-card { padding: 20px; }
+
+      /* Vol / best grids */
+      .vol-grid, .best-grid { grid-template-columns: 1fr; }
+      .vol-card, .best-card { padding: 20px; }
+      .vol-time { font-size: 20px; }
+      .best-time { font-size: 18px; }
+
+      /* Status grid */
+      .status-grid { grid-template-columns: 1fr 1fr; }
+
+      /* CTA */
+      .cta-section { padding: 48px 0 56px; }
+      .cta-card { padding: 28px 20px; }
+      .cta-title { font-size: 20px; }
+      .cta-text { font-size: 14px; }
+
+      /* Section headers */
+      .section-header h2 { font-size: clamp(18px, 5vw, 26px); }
+      .section { padding: 28px 0; }
+    }
+
+    @media (max-width: 380px) {
+      .mkt-sessions-detail { display: none; }
+      .timeline-inner { min-width: 460px; }
+      .tl-row-label { width: 54px; font-size: 9px; }
+      .tl-hour-row { padding-left: 54px; }
+      .tl-grid { left: 54px; }
+      .clocks-grid { grid-template-columns: 1fr 1fr; }
+      .status-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
     .mkt-banner {
       width: 100%;
       padding: 9px 0;
@@ -1294,35 +1476,6 @@
 
     .footer-copy { font-size: 11px; color: var(--t3); }
 
-    /* ============================================================
-       RESPONSIVE
-    ============================================================ */
-    @media (max-width: 900px) {
-      .clocks-grid { grid-template-columns: repeat(3, 1fr); }
-    }
-
-    @media (max-width: 640px) {
-      .clocks-grid { grid-template-columns: repeat(2, 1fr); }
-      .session-grid { grid-template-columns: 1fr; }
-      .session-now-card { flex-direction: column; text-align: center; gap: 16px; }
-      .session-badge-pos { position: static; }
-      .tz-card { grid-template-columns: 1fr; }
-      .tz-main-time { text-align: left; font-size: 32px; }
-      .tz-main-date { text-align: left; }
-      .nav-tz-label { display: none; }
-      .cta-card { padding: 36px 24px; }
-    }
-
-    @media (max-width: 480px) {
-      .wrap { padding: 0 16px; }
-      .gate-form-card { padding: 22px 18px; }
-      .vol-grid, .best-grid, .sessions-grid { grid-template-columns: 1fr; }
-      .status-grid { grid-template-columns: 1fr 1fr; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation: none !important; transition: none !important; }
-    }
   </style>
 </head>
 <body>
@@ -1421,6 +1574,7 @@
         <img src="logo.png" alt="Belotto Trader" id="nav-img"
              onerror="document.getElementById('nav-img').style.display='none';document.getElementById('nav-logo-fb').style.display='block'">
         <div id="nav-logo-fb" style="display:none" class="nav-logo-fb">
+          <div class="nav-logo-mark"></div>
           <span>BELOTTO</span><span> TRADER</span>
         </div>
       </div>
@@ -1461,45 +1615,23 @@
     </div>
   </div>
 
-  <!-- ── CONTAINER ── -->
-  <div class="wrap">
+  <!-- Hidden TZ elements — IDs usados pelo JS -->
+  <span id="tz-bar-label" style="display:none">—</span>
+  <code id="tz-bar-detected" style="display:none"></code>
 
-    <!-- ── PAGE HEADER ── -->
-    <div class="page-header fade-up">
-      <div class="eyebrow">Belotto Trader · Paulo Belotto · Clube do Gain</div>
-      <h1 class="grad-text">Mapa de Volatilidade<br>Global</h1>
-      <p class="page-header-sub">
-        Sessões abertas, sobreposições institucionais, janelas de liquidez e os melhores
-        momentos para operar — todos convertidos para o seu fuso horário.
-      </p>
-    </div>
-
-    <!-- TZ INFO BAR -->
-    <div class="tz-bar fade-up d1">
-      <span>
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
-        Exibindo em: <strong id="tz-bar-label">—</strong>
-      </span>
-      <span style="font-size:11px;color:var(--t3)">
-        Detectado: <code id="tz-bar-detected" style="font-family:monospace;font-size:11px"></code>
-      </span>
-    </div>
-
-    <!-- ── 24H TIMELINE (first section) ── -->
-    <section class="section">
-      <div class="section-header fade-up">
-        <div class="eyebrow">Linha do Tempo</div>
-        <h2>24 horas — Sessões Globais</h2>
-        <p>Visualize onde cada bolsa está aberta. Horário local: <strong id="tl-tz-label" style="color:var(--t1)">—</strong></p>
+  <!-- ── TIMELINE HERO (imediatamente abaixo do banner de status) ── -->
+  <div class="tl-hero">
+    <div class="wrap">
+      <div class="tl-hero-bar fade-up">
+        <span class="tl-hero-eyebrow">LINHA DO TEMPO · 24H</span>
+        <span class="tl-hero-tz" id="tl-tz-label">—</span>
       </div>
-
-      <div class="card timeline-card fade-up d1">
+      <div class="card timeline-card fade-up">
         <div class="timeline-scroll">
           <div class="timeline-inner" id="tl-inner">
             <!-- JS populated -->
           </div>
         </div>
-
         <div class="tl-legend">
           <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(26,127,255,.7)"></div>Sydney</div>
           <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(249,115,22,.7)"></div>Tokyo</div>
@@ -1511,7 +1643,21 @@
           </div>
         </div>
       </div>
-    </section>
+    </div>
+  </div>
+
+  <!-- ── CONTEÚDO PRINCIPAL ── -->
+  <div class="wrap">
+
+    <!-- ── PAGE HEADER (compact) ── -->
+    <div class="page-header fade-up">
+      <div class="eyebrow">Belotto Trader · Clube do Gain</div>
+      <h1 class="grad-text">Mapa de Volatilidade Global</h1>
+      <p class="page-header-sub">
+        Sessões abertas, sobreposições institucionais, janelas de liquidez e os melhores
+        momentos para operar — todos convertidos para o seu fuso horário.
+      </p>
+    </div>
 
     <div class="divider"></div>
 
