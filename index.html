@@ -2447,7 +2447,9 @@ async function submitLead() {
   // Save to Supabase
   try {
     if (sb && SB_CONFIGURED) {
-      const { error } = await sb.from("leads_market_sessions").insert([{
+
+      // ── 1. Salva na tabela específica da ferramenta (com dados de timezone) ──
+      const { error: e1 } = await sb.from("leads_market_sessions").insert([{
         name,
         email,
         whatsapp,
@@ -2458,7 +2460,36 @@ async function submitLead() {
         user_agent:         navigator.userAgent,
         lead_source:        "mapa_volatilidade_global",
       }]);
-      if (error) console.warn("Supabase insert error:", error);
+      if (e1) console.warn("leads_market_sessions error:", e1);
+
+      // ── 2. Upsert na tabela central de pessoas (CRM unificado) ──
+      const { error: e2 } = await sb.from("pessoas").upsert([{
+        email,
+        nome:           name,
+        telefone:       whatsapp,
+        status:         "lead",
+        origem:         "mapa_volatilidade_global",
+        ultimo_contato: new Date().toISOString(),
+        updated_at:     new Date().toISOString(),
+      }], { onConflict: "email", ignoreDuplicates: false });
+      if (e2) console.warn("pessoas upsert error:", e2);
+
+      // ── 3. Registra evento na linha do tempo ──
+      const { error: e3 } = await sb.from("pessoa_eventos").insert([{
+        email,
+        telefone:        whatsapp,
+        tipo:            "primeiro_contato",
+        canal:           "mapa_volatilidade",
+        origem:          "mapa_volatilidade_global",
+        descricao:       "Lead capturado via Mapa de Volatilidade Global",
+        dados_extras: {
+          detected_timezone: detected,
+          timezone_label:    TZ_LABELS[detected] || detected,
+          country_hint:      countryHint,
+          user_agent:        navigator.userAgent,
+        },
+      }]);
+      if (e3) console.warn("pessoa_eventos error:", e3);
     }
   } catch(e) { console.warn("Supabase error (proceeding anyway):", e); }
 
