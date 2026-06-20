@@ -2130,6 +2130,60 @@
 }
 
 
+/* ============================================================
+   HOTFIX V4 — remove rolagem vertical interna da timeline
+   Motivo: overflow-x hidden/auto + elementos com top negativo
+   fazia o navegador criar uma área rolável vertical dentro do card.
+============================================================ */
+.timeline-card.market-map-card,
+.market-map-card .timeline-scroll,
+.timeline-scroll {
+  overflow-y: hidden !important;
+}
+
+@media (min-width: 641px) {
+  .market-map-card .timeline-scroll {
+    overflow-x: hidden !important;
+    overflow-y: hidden !important;
+  }
+}
+
+.market-map-card .tl-track {
+  overflow: hidden !important;
+}
+
+.market-map-card .tl-overlap {
+  top: 0 !important;
+  bottom: 0 !important;
+}
+
+.market-map-card .tl-overlap::after {
+  top: 4px !important;
+  font-size: 7px !important;
+  opacity: .85;
+}
+
+.market-map-card .tl-now-line {
+  top: 0 !important;
+  bottom: 0 !important;
+}
+
+.market-map-card .tl-row:not(:first-child) .tl-now-line::before {
+  display: none !important;
+}
+
+.market-map-card .tl-now-line::before {
+  top: 6px !important;
+  transform: translateX(-50%) !important;
+  white-space: nowrap;
+}
+
+.market-map-card .tl-rows {
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+}
+
+
   </style>
 </head>
 <body>
