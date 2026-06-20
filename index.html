@@ -1595,6 +1595,381 @@
 
     .footer-copy { font-size: 11px; color: var(--t3); }
 
+
+/* ============================================================
+   UPGRADE VISUAL — GLOBAL MARKET HOURS MAP
+   Objetivo: transformar a timeline em protagonista do painel
+============================================================ */
+.market-map-hero {
+  padding: 38px 0 32px;
+  border-bottom: 1px solid var(--border);
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 0%, rgba(0,232,122,.09), transparent 62%),
+    radial-gradient(ellipse 55% 50% at 85% 15%, rgba(26,127,255,.06), transparent 60%),
+    rgba(255,255,255,.012);
+}
+
+.market-map-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 22px;
+  margin-bottom: 26px;
+  flex-wrap: wrap;
+}
+
+.market-map-title h1 {
+  font-size: clamp(30px, 5.4vw, 64px);
+  line-height: .94;
+  letter-spacing: -.065em;
+  font-weight: 950;
+  margin-bottom: 12px;
+}
+
+.market-map-title p {
+  color: var(--t2);
+  font-size: 15px;
+  line-height: 1.65;
+  max-width: 720px;
+}
+
+.market-map-now {
+  min-width: 230px;
+  padding: 20px 22px;
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.025));
+  border: 1px solid rgba(255,255,255,.12);
+  text-align: right;
+  box-shadow: 0 0 46px rgba(0,232,122,.10), 0 18px 60px rgba(0,0,0,.28);
+}
+
+.market-map-now-label {
+  font-size: 10px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--green);
+  font-weight: 900;
+  margin-bottom: 9px;
+}
+
+.market-map-now-time {
+  font-family: "SF Mono","Fira Code",monospace;
+  font-size: 38px;
+  line-height: 1;
+  font-weight: 950;
+  color: var(--t1);
+}
+
+.market-map-now-tz {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--t3);
+  font-family: monospace;
+  overflow-wrap: anywhere;
+}
+
+.timeline-card.market-map-card {
+  padding: 30px 28px 24px;
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.058), rgba(255,255,255,.025));
+  border: 1px solid rgba(255,255,255,.13);
+  box-shadow: 0 26px 90px rgba(0,0,0,.45);
+  overflow: hidden;
+}
+
+.market-map-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+
+.market-map-toolbar-title {
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--green);
+  font-weight: 950;
+}
+
+.market-map-toolbar-sub {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--t3);
+  font-family: "SF Mono","Fira Code",monospace;
+}
+
+.market-map-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--t2);
+  font-size: 12px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.045);
+  border: 1px solid rgba(255,255,255,.08);
+}
+
+.market-map-card .timeline-inner {
+  min-width: 900px;
+}
+
+.market-map-card .tl-hour-row {
+  padding-left: 124px;
+  margin-bottom: 12px;
+}
+
+.market-map-card .tl-hour {
+  font-size: 11px;
+  color: rgba(255,255,255,.34);
+  font-weight: 800;
+  letter-spacing: .02em;
+}
+
+.market-map-card .tl-grid {
+  left: 124px;
+  top: 30px;
+  bottom: 15px;
+}
+
+.market-map-card .tl-grid-line {
+  border-left: 1px solid rgba(255,255,255,.065);
+}
+
+.market-map-card .tl-rows {
+  gap: 13px;
+}
+
+.market-map-card .tl-row-label {
+  width: 124px;
+  padding-right: 17px;
+  font-size: 13px;
+  font-weight: 850;
+  color: var(--t1);
+  opacity: .94;
+}
+
+.market-map-card .tl-track {
+  height: 44px;
+  border-radius: 13px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.024));
+  border: 1px solid rgba(255,255,255,.058);
+  overflow: visible;
+}
+
+.market-map-card .tl-bar {
+  top: 6px;
+  height: 31px;
+  border-radius: 11px;
+  font-size: 0;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.28),
+    0 10px 24px rgba(0,0,0,.24);
+}
+
+.market-map-card .tl-bar::after {
+  content: attr(data-label);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0,0,0,.70);
+  text-shadow: 0 1px 0 rgba(255,255,255,.22);
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: .09em;
+  white-space: nowrap;
+}
+
+.market-map-card .tl-bar-sydney {
+  background: linear-gradient(90deg, #1a7fff, #22d3ee);
+  border: 1px solid rgba(34,211,238,.48);
+}
+
+.market-map-card .tl-bar-tokyo {
+  background: linear-gradient(90deg, #f97316, #f5c518);
+  border: 1px solid rgba(249,115,22,.48);
+}
+
+.market-map-card .tl-bar-london {
+  background: linear-gradient(90deg, #00e87a, #8affc1);
+  border: 1px solid rgba(0,232,122,.48);
+}
+
+.market-map-card .tl-bar-newyork {
+  background: linear-gradient(90deg, #7c3aed, #d946ef);
+  border: 1px solid rgba(124,58,237,.48);
+}
+
+.market-map-card .tl-overlap {
+  top: -8px;
+  bottom: -8px;
+  background: rgba(245,197,24,.14);
+  border: 1px solid rgba(245,197,24,.58);
+  border-radius: 8px;
+  box-shadow: 0 0 30px rgba(245,197,24,.18);
+  z-index: 3;
+}
+
+.market-map-card .tl-overlap::after {
+  content: "OVERLAP";
+  position: absolute;
+  top: -23px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  font-weight: 950;
+  color: var(--gold);
+  letter-spacing: .13em;
+  white-space: nowrap;
+}
+
+.market-map-card .tl-now-line {
+  top: -20px;
+  bottom: -20px;
+  width: 3px;
+  background: #fff;
+  box-shadow: 0 0 18px #fff, 0 0 36px rgba(0,232,122,.52);
+  z-index: 20;
+}
+
+.market-map-card .tl-now-line::before {
+  content: "VOCÊ ESTÁ AQUI";
+  top: -30px;
+  background: #fff;
+  color: #07070f;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: .08em;
+  box-shadow: 0 8px 28px rgba(255,255,255,.24);
+}
+
+.market-map-legend {
+  gap: 13px 20px;
+  margin-top: 22px;
+}
+
+.market-map-legend .tl-legend-dot.sydney { background: linear-gradient(90deg, #1a7fff, #22d3ee); }
+.market-map-legend .tl-legend-dot.tokyo { background: linear-gradient(90deg, #f97316, #f5c518); }
+.market-map-legend .tl-legend-dot.london { background: linear-gradient(90deg, #00e87a, #8affc1); }
+.market-map-legend .tl-legend-dot.newyork { background: linear-gradient(90deg, #7c3aed, #d946ef); }
+
+.market-overlaps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.overlap-pill {
+  padding: 15px 16px;
+  border-radius: 15px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.085);
+}
+
+.overlap-pill strong {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.overlap-pill span {
+  font-size: 11.5px;
+  color: var(--t2);
+}
+
+.overlap-pill.hot {
+  border-color: rgba(245,197,24,.36);
+  background: rgba(245,197,24,.075);
+  box-shadow: 0 0 28px rgba(245,197,24,.07);
+}
+
+@media (max-width: 640px) {
+  .market-map-hero {
+    padding: 25px 0 20px;
+  }
+
+  .market-map-head {
+    align-items: flex-start;
+    margin-bottom: 18px;
+  }
+
+  .market-map-title h1 {
+    font-size: clamp(32px, 11vw, 46px);
+  }
+
+  .market-map-title p {
+    font-size: 14px;
+  }
+
+  .market-map-now {
+    width: 100%;
+    text-align: left;
+    padding: 17px 18px;
+  }
+
+  .market-map-now-time {
+    font-size: 32px;
+  }
+
+  .timeline-card.market-map-card {
+    padding: 20px 14px;
+    border-radius: 20px;
+  }
+
+  .market-map-card .timeline-inner {
+    min-width: 780px;
+  }
+
+  .market-map-card .tl-hour-row {
+    padding-left: 102px;
+  }
+
+  .market-map-card .tl-grid {
+    left: 102px;
+  }
+
+  .market-map-card .tl-row-label {
+    width: 102px;
+    font-size: 12px;
+  }
+
+  .market-map-card .tl-track {
+    height: 40px;
+  }
+
+  .market-map-card .tl-bar {
+    height: 29px;
+  }
+
+  .market-map-card .tl-bar::after {
+    font-size: 10px;
+  }
+
+  .market-map-card .tl-now-line::before {
+    content: "AGORA";
+  }
+
+  .market-overlaps {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Opcional: reduz o peso visual das seções abaixo para a timeline mandar no painel */
+.tool-info-bar {
+  opacity: .86;
+}
+
   </style>
 </head>
 <body>
@@ -1892,32 +2267,74 @@
   <span id="tz-bar-label" style="display:none">—</span>
   <code id="tz-bar-detected" style="display:none"></code>
 
-  <!-- ── TIMELINE HERO (imediatamente abaixo do banner de status) ── -->
-  <div class="tl-hero">
+  <!-- ── MARKET MAP HERO — painel principal ── -->
+  <section class="market-map-hero">
     <div class="wrap">
-      <div class="tl-hero-bar fade-up">
-        <span class="tl-hero-eyebrow">LINHA DO TEMPO · 24H</span>
-        <span class="tl-hero-tz" id="tl-tz-label">—</span>
+
+      <div class="market-map-head fade-up">
+        <div class="market-map-title">
+          <div class="eyebrow">Mapa global das bolsas</div>
+          <h1 class="grad-text">Veja quem está<br>aberto agora.</h1>
+          <p>
+            Um painel visual para enxergar, em tempo real, quais mercados globais estão abertos,
+            quais estão fechados e onde está a próxima janela de liquidez — tudo convertido para o seu fuso.
+          </p>
+        </div>
+
+        <div class="market-map-now">
+          <div class="market-map-now-label">Agora no seu fuso</div>
+          <div class="market-map-now-time" id="market-map-time">--:--</div>
+          <div class="market-map-now-tz" id="market-map-tz">—</div>
+        </div>
       </div>
-      <div class="card timeline-card fade-up">
+
+      <div class="card timeline-card market-map-card fade-up d1">
+        <div class="market-map-toolbar">
+          <div>
+            <div class="market-map-toolbar-title">Linha do tempo 24h</div>
+            <div class="market-map-toolbar-sub" id="tl-tz-label">—</div>
+          </div>
+
+          <div class="market-map-hint">
+            <span class="dot dot-g"></span>
+            <span>Arraste para o lado no celular</span>
+          </div>
+        </div>
+
         <div class="timeline-scroll">
           <div class="timeline-inner" id="tl-inner">
             <!-- JS populated -->
           </div>
         </div>
-        <div class="tl-legend">
-          <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(26,127,255,.7)"></div>Sydney</div>
-          <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(249,115,22,.7)"></div>Tokyo</div>
-          <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(0,232,122,.7)"></div>Londres</div>
-          <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(124,58,237,.7)"></div>New York</div>
-          <div class="tl-legend-item"><div class="tl-legend-overlap"></div>Sobreposição Londres+NY</div>
-          <div class="tl-legend-item" style="color:rgba(255,255,255,.5);font-size:11px">
-            <div style="width:2px;height:12px;background:rgba(255,255,255,.7);border-radius:1px"></div>Agora
+
+        <div class="tl-legend market-map-legend">
+          <div class="tl-legend-item"><div class="tl-legend-dot sydney"></div>Sydney</div>
+          <div class="tl-legend-item"><div class="tl-legend-dot tokyo"></div>Tokyo</div>
+          <div class="tl-legend-item"><div class="tl-legend-dot london"></div>Londres</div>
+          <div class="tl-legend-item"><div class="tl-legend-dot newyork"></div>New York</div>
+          <div class="tl-legend-item"><div class="tl-legend-overlap"></div>Sobreposição Londres + NY</div>
+        </div>
+
+        <div class="market-overlaps">
+          <div class="overlap-pill">
+            <strong>Ásia</strong>
+            <span>Sydney + Tokyo</span>
+          </div>
+
+          <div class="overlap-pill">
+            <strong>Europa</strong>
+            <span>Tokyo fechando + Londres abrindo</span>
+          </div>
+
+          <div class="overlap-pill hot">
+            <strong>Londres + New York</strong>
+            <span>Maior fluxo institucional do dia</span>
           </div>
         </div>
       </div>
+
     </div>
-  </div>
+  </section>
 
   <!-- ── CONTEÚDO PRINCIPAL ── -->
   <div class="wrap">
@@ -2426,6 +2843,7 @@ function updateWaPreview() {
   });
 });
 function tick() {
+  updateMarketMapClock();
   updateMainClock();
   updateClocks();
   updateSessionNow();
@@ -2522,6 +2940,18 @@ function refreshTzLabels() {
     const el = document.getElementById(id);
     if (el) el.textContent = label;
   });
+}
+
+// ─── MARKET MAP CLOCK ───────────────────────────────────────
+
+function updateMarketMapClock() {
+  const timeEl = document.getElementById("market-map-time");
+  const tzEl   = document.getElementById("market-map-tz");
+  if (!timeEl || !tzEl) return;
+
+  const now = DateTime.now().setZone(activeTz);
+  timeEl.textContent = now.toFormat("HH:mm:ss");
+  tzEl.textContent = activeTz;
 }
 
 // ─── MAIN CLOCK ──────────────────────────────────────────────
@@ -2852,7 +3282,7 @@ function renderTimelineBars() {
 function makeBar(s, startH, durationH) {
   const left  = pct(startH);
   const width = pct(durationH);
-  return `<div class="tl-bar ${s.barClass}" style="left:${left}%;width:${width}%"></div>`;
+  return `<div class="tl-bar ${s.barClass}" data-label="${s.name}" style="left:${left}%;width:${width}%"></div>`;
 }
 
 function pct(h) { return Math.min(100, Math.max(0, (h / 24) * 100)).toFixed(3); }
