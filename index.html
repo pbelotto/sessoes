@@ -2075,6 +2075,61 @@
   }
 }
 
+
+/* ============================================================
+   AJUSTES V3 — desktop sem rolagem + mercado fechado no fim de semana
+============================================================ */
+@media (min-width: 641px) {
+  .market-map-card .timeline-scroll {
+    overflow-x: hidden !important;
+  }
+
+  .market-map-card .timeline-inner {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .market-map-card .tl-hour-row {
+    padding-left: 112px !important;
+  }
+
+  .market-map-card .tl-grid {
+    left: 112px !important;
+  }
+
+  .market-map-card .tl-row-label {
+    width: 112px !important;
+    padding-right: 14px !important;
+    font-size: 12px !important;
+  }
+
+  .market-map-card .tl-bar::after {
+    font-size: clamp(7px, .72vw, 10px) !important;
+    letter-spacing: .07em !important;
+  }
+}
+
+.market-closed-day .tl-bar {
+  opacity: .26;
+  filter: grayscale(.55);
+}
+
+.market-closed-day .tl-overlap {
+  opacity: .16;
+}
+
+.market-closed-day .tl-now-line {
+  background: rgba(239,68,68,.95) !important;
+  box-shadow: 0 0 18px rgba(239,68,68,.75), 0 0 36px rgba(239,68,68,.28) !important;
+}
+
+.market-closed-day .tl-now-line::before {
+  content: "MERCADO FECHADO" !important;
+  color: #fff !important;
+  background: var(--red) !important;
+}
+
+
   </style>
 </head>
 <body>
@@ -3101,20 +3156,66 @@ function updateClocks() {
 }
 
 // ─── SESSION UTILS ───────────────────────────────────────────
-function sessionOpenCloseUTC(sess) {
-  const open  = DateTime.now().setZone(sess.tz).set({ hour: sess.open[0],  minute: sess.open[1],  second: 0, millisecond: 0 }).toUTC();
-  const close = DateTime.now().setZone(sess.tz).set({ hour: sess.close[0], minute: sess.close[1], second: 0, millisecond: 0 }).toUTC();
+function isTradingWeekday(dt) {
+  // Luxon: Monday = 1 ... Sunday = 7
+  return dt.weekday >= 1 && dt.weekday <= 5;
+}
+
+function isGlobalMarketWeekend() {
+  // Referência operacional: mercado global fechado de sexta 17:00 NY até domingo 17:00 NY.
+  // Isso evita o erro clássico de mostrar bolsa aberta no sábado só porque o horário local bateu.
+  const ny = DateTime.now().setZone("America/New_York");
+  if (ny.weekday === 6) return true; // sábado inteiro NY
+  if (ny.weekday === 7 && ny.hour < 17) return true; // domingo antes da reabertura dos futuros/FX
+  if (ny.weekday === 5 && ny.hour >= 17) return true; // sexta após fechamento global
+  return false;
+}
+
+function sessionOpenCloseUTC(sess, base = DateTime.now()) {
+  const baseLocal = base.setZone(sess.tz);
+  const open  = baseLocal.set({ hour: sess.open[0],  minute: sess.open[1],  second: 0, millisecond: 0 }).toUTC();
+  const close = baseLocal.set({ hour: sess.close[0], minute: sess.close[1], second: 0, millisecond: 0 }).toUTC();
   return { open, close };
 }
 
 function isSessionOpen(sess) {
-  const now = DateTime.now().toUTC();
-  const { open, close } = sessionOpenCloseUTC(sess);
-  return now >= open && now < close;
+  if (isGlobalMarketWeekend()) return false;
+
+  const nowLocal = DateTime.now().setZone(sess.tz);
+  if (!isTradingWeekday(nowLocal)) return false;
+
+  const openMinutes  = sess.open[0] * 60 + sess.open[1];
+  const closeMinutes = sess.close[0] * 60 + sess.close[1];
+  const nowMinutes   = nowLocal.hour * 60 + nowLocal.minute + nowLocal.second / 60;
+
+  return nowMinutes >= openMinutes && nowMinutes < closeMinutes;
 }
 
 function activeSessions() {
   return SESSIONS.filter(isSessionOpen);
+}
+
+function nextSessionOpenDateTime(sess) {
+  const now = DateTime.now();
+
+  for (let i = 0; i <= 10; i++) {
+    let candidate = now.setZone(sess.tz).plus({ days: i })
+      .set({ hour: sess.open[0], minute: sess.open[1], second: 0, millisecond: 0 });
+
+    if (!isTradingWeekday(candidate)) continue;
+
+    // Evita apontar uma abertura durante o bloco de fim de semana global.
+    const candidateNY = candidate.setZone("America/New_York");
+    const blocked =
+      candidateNY.weekday === 6 ||
+      (candidateNY.weekday === 7 && candidateNY.hour < 17) ||
+      (candidateNY.weekday === 5 && candidateNY.hour >= 17);
+
+    if (blocked) continue;
+    if (candidate.toMillis() > now.toMillis()) return candidate;
+  }
+
+  return null;
 }
 
 // Convert an origin-tz time to activeTz and format as HH:mm
@@ -3190,23 +3291,28 @@ function updateSessionNow() {
 }
 
 function findNextSession(nameEl, timeEl) {
-  const now  = DateTime.now().toUTC().toMillis();
-  let best   = null, bestDiff = Infinity;
+  const now = DateTime.now();
+  let best = null;
 
   SESSIONS.forEach(s => {
     if (isSessionOpen(s)) return;
-    const { open } = sessionOpenCloseUTC(s);
-    let diff = open.toMillis() - now;
-    if (diff < 0) diff += 86_400_000; // next day
-    if (diff < bestDiff) { bestDiff = diff; best = { s, diff, open }; }
+    const open = nextSessionOpenDateTime(s);
+    if (!open) return;
+
+    const diff = open.toMillis() - now.toMillis();
+    if (!best || diff < best.diff) best = { s, diff, open };
   });
 
   if (best) {
-    const h    = Math.floor(best.diff / 3_600_000);
-    const m    = Math.floor((best.diff % 3_600_000) / 60_000);
+    const totalMin = Math.max(0, Math.floor(best.diff / 60_000));
+    const d = Math.floor(totalMin / 1440);
+    const h = Math.floor((totalMin % 1440) / 60);
+    const m = totalMin % 60;
     const time = best.open.setZone(activeTz).toFormat("HH:mm");
+    const dayTxt = d > 0 ? `${d}d ` : "";
+
     nameEl.textContent = best.s.name;
-    timeEl.textContent = `Em ${h}h ${m}min · Abre às ${time}`;
+    timeEl.textContent = `Em ${dayTxt}${h}h ${m}min · Abre às ${time}`;
   }
 }
 
@@ -3332,6 +3438,7 @@ function buildTimeline() {
 
   html += `</div></div>`;
   inner.innerHTML = html;
+  inner.classList.toggle("market-closed-day", isGlobalMarketWeekend());
 
   renderTimelineBars();
 }
@@ -3386,6 +3493,9 @@ function makeBar(s, startH, durationH) {
 function pct(h) { return Math.min(100, Math.max(0, (h / 24) * 100)).toFixed(3); }
 
 function updateTimelineNow() {
+  const inner = document.getElementById("tl-inner");
+  if (inner) inner.classList.toggle("market-closed-day", isGlobalMarketWeekend());
+
   SESSIONS.forEach(s => {
     const track = document.getElementById(`tl-track-${s.id}`);
     if (!track) return;
