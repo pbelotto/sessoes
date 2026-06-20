@@ -1970,6 +1970,111 @@
   opacity: .86;
 }
 
+
+/* ============================================================
+   AJUSTES V2 — Preview igual ao painel, horas 24h e hero menor
+============================================================ */
+.market-map-hero {
+  padding-top: 22px !important;
+}
+.market-map-head {
+  margin-bottom: 14px !important;
+  align-items: center !important;
+}
+.market-map-title .eyebrow {
+  margin-bottom: 6px !important;
+  opacity: .8;
+}
+.market-map-title h1 {
+  font-size: clamp(22px, 3vw, 38px) !important;
+  line-height: 1.02 !important;
+  letter-spacing: -.045em !important;
+  margin-bottom: 6px !important;
+  opacity: .82;
+}
+.market-map-title p {
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+  max-width: 700px !important;
+  opacity: .84;
+}
+.timeline-card.market-map-card {
+  margin-top: 6px;
+  padding-top: 34px !important;
+}
+.market-map-toolbar {
+  margin-bottom: 24px !important;
+}
+.market-map-toolbar-title {
+  font-size: 13px !important;
+}
+.market-map-card .timeline-inner {
+  min-width: 1320px !important;
+}
+.market-map-card .tl-hour-row {
+  padding-left: 124px !important;
+  margin-bottom: 14px !important;
+}
+.market-map-card .tl-hour {
+  font-size: 10px !important;
+  text-align: center !important;
+  color: rgba(255,255,255,.50) !important;
+  font-weight: 850 !important;
+}
+.market-map-card .tl-grid {
+  left: 124px !important;
+  top: 32px !important;
+}
+.market-map-card .tl-grid-line:nth-child(3n+1) {
+  border-left-color: rgba(255,255,255,.12) !important;
+}
+.market-map-card .tl-grid-line {
+  border-left-color: rgba(255,255,255,.045) !important;
+}
+.market-map-card .tl-row:not(:first-child) .tl-now-line::before {
+  content: "" !important;
+  display: none !important;
+}
+.market-map-card .tl-now-line::before {
+  top: -33px !important;
+}
+.market-map-now {
+  transform: scale(.92);
+  transform-origin: right center;
+}
+.market-map-now-time {
+  font-size: 32px !important;
+}
+
+.gate-preview-wrap.market-preview-mini {
+  background: #101018;
+  box-shadow: 0 18px 50px rgba(0,0,0,.35);
+}
+.market-preview-mini svg text {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+}
+
+@media (max-width: 640px) {
+  .market-map-title h1 {
+    font-size: clamp(24px, 8vw, 34px) !important;
+  }
+  .market-map-title p {
+    font-size: 12.5px !important;
+  }
+  .market-map-now {
+    transform: none;
+  }
+  .market-map-card .timeline-inner {
+    min-width: 1180px !important;
+  }
+  .market-map-card .tl-hour-row {
+    padding-left: 102px !important;
+  }
+  .market-map-card .tl-grid {
+    left: 102px !important;
+  }
+}
+
   </style>
 </head>
 <body>
@@ -2019,52 +2124,46 @@
         Prévia — o que você vai encontrar dentro
       </div>
 
-      <div class="gate-preview-wrap">
-        <svg viewBox="0 0 700 178" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">
-          <!-- bg -->
-          <rect width="700" height="178" rx="10" fill="#0d0f17"/>
-          <!-- grid lines -->
-          <line x1="74" y1="28" x2="74"  y2="158" stroke="#ffffff0f" stroke-width="1"/>
-          <line x1="149" y1="28" x2="149" y2="158" stroke="#ffffff0f" stroke-width="1"/>
-          <line x1="224" y1="28" x2="224" y2="158" stroke="#ffffff0f" stroke-width="1"/>
-          <line x1="299" y1="28" x2="299" y2="158" stroke="#ffffff0f" stroke-width="1"/>
-          <line x1="374" y1="28" x2="374" y2="158" stroke="#ffffff0f" stroke-width="1"/>
-          <line x1="449" y1="28" x2="449" y2="158" stroke="#ffffff0f" stroke-width="1"/>
-          <line x1="524" y1="28" x2="524" y2="158" stroke="#ffffff0f" stroke-width="1"/>
-          <line x1="599" y1="28" x2="599" y2="158" stroke="#ffffff0f" stroke-width="1"/>
-          <line x1="674" y1="28" x2="674" y2="158" stroke="#ffffff0f" stroke-width="1"/>
-          <!-- hour labels: 0h 3h 6h 9h 12h 15h 18h 21h -->
-          <text x="74"  y="22" font-size="9" fill="#ffffff33" font-family="monospace" text-anchor="middle">00h</text>
-          <text x="149" y="22" font-size="9" fill="#ffffff33" font-family="monospace" text-anchor="middle">03h</text>
-          <text x="224" y="22" font-size="9" fill="#ffffff33" font-family="monospace" text-anchor="middle">06h</text>
-          <text x="299" y="22" font-size="9" fill="#ffffff33" font-family="monospace" text-anchor="middle">09h</text>
-          <text x="374" y="22" font-size="9" fill="#ffffff33" font-family="monospace" text-anchor="middle">12h</text>
-          <text x="449" y="22" font-size="9" fill="#ffffff33" font-family="monospace" text-anchor="middle">15h</text>
-          <text x="524" y="22" font-size="9" fill="#ffffff33" font-family="monospace" text-anchor="middle">18h</text>
-          <text x="599" y="22" font-size="9" fill="#ffffff33" font-family="monospace" text-anchor="middle">21h</text>
-          <!-- row labels -->
-          <text x="10" y="51" font-size="9.5" fill="#ffffffbb" font-family="sans-serif" dominant-baseline="middle">🌏 Sydney</text>
-          <text x="10" y="84" font-size="9.5" fill="#ffffffbb" font-family="sans-serif" dominant-baseline="middle">🌸 Tokyo</text>
-          <text x="10" y="117" font-size="9.5" fill="#ffffffbb" font-family="sans-serif" dominant-baseline="middle">🇬🇧 Londres</text>
-          <text x="10" y="150" font-size="9.5" fill="#ffffffbb" font-family="sans-serif" dominant-baseline="middle">🇺🇸 New York</text>
-          <!-- Sydney bars (blue) — 0h-2h and 22h-24h -->
-          <rect x="74" y="37" width="50" height="26" rx="4" fill="rgba(26,127,255,.75)"/>
-          <rect x="624" y="37" width="50" height="26" rx="4" fill="rgba(26,127,255,.75)"/>
-          <text x="649" y="50" font-size="8" fill="#ffffffcc" font-family="monospace" text-anchor="middle" dominant-baseline="middle">AGORA</text>
-          <!-- Tokyo bars (orange) — 0h-6h and 22h-24h -->
-          <rect x="74" y="70" width="150" height="26" rx="4" fill="rgba(249,115,22,.75)"/>
-          <rect x="624" y="70" width="50" height="26" rx="4" fill="rgba(249,115,22,.75)"/>
-          <text x="649" y="83" font-size="8" fill="#ffffffcc" font-family="monospace" text-anchor="middle" dominant-baseline="middle">AGORA</text>
-          <!-- London bar (green) — 8h-16:30h -->
-          <rect x="274" y="103" width="204" height="26" rx="4" fill="rgba(0,232,122,.75)"/>
-          <text x="647" y="116" font-size="8" fill="#ffffff55" font-family="monospace" text-anchor="middle" dominant-baseline="middle">AGORA</text>
-          <!-- New York bar (purple) — 13:30h-20h -->
-          <rect x="411" y="136" width="162" height="26" rx="4" fill="rgba(124,58,237,.75)"/>
-          <!-- Overlap zone London+NY (13:30-16:30) -->
-          <rect x="411" y="103" width="67" height="26" rx="4" fill="rgba(245,197,24,.25)"/>
-          <!-- AGORA line at 22h (x=599) -->
-          <line x1="624" y1="28" x2="624" y2="166" stroke="#ffffffcc" stroke-width="1.5" stroke-dasharray="3,2"/>
-          <text x="624" y="172" font-size="8" fill="#ffffff66" font-family="monospace" text-anchor="middle">AGORA</text>
+      <div class="gate-preview-wrap market-preview-mini">
+        <svg viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">
+          <defs>
+            <linearGradient id="g-syd" x1="0" x2="1"><stop stop-color="#1a7fff"/><stop offset="1" stop-color="#22d3ee"/></linearGradient>
+            <linearGradient id="g-tok" x1="0" x2="1"><stop stop-color="#f97316"/><stop offset="1" stop-color="#f5c518"/></linearGradient>
+            <linearGradient id="g-lon" x1="0" x2="1"><stop stop-color="#00e87a"/><stop offset="1" stop-color="#8affc1"/></linearGradient>
+            <linearGradient id="g-ny"  x1="0" x2="1"><stop stop-color="#7c3aed"/><stop offset="1" stop-color="#d946ef"/></linearGradient>
+            <filter id="softGlow"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <rect width="760" height="250" rx="22" fill="#11111a"/>
+          <rect x="18" y="18" width="724" height="214" rx="20" fill="#161620" stroke="#ffffff1f"/>
+          <text x="42" y="48" font-size="13" font-weight="900" letter-spacing="4" fill="#00e87a">LINHA DO TEMPO 24H</text>
+          <text x="42" y="68" font-size="11" fill="#8888aa">Preview visual do painel interno</text>
+
+          <g transform="translate(115,88)">
+            <g fill="#ffffff80" font-size="10" font-weight="800" text-anchor="middle">
+              <text x="0" y="-11">00h</text><text x="66" y="-11">03h</text><text x="132" y="-11">06h</text><text x="198" y="-11">09h</text><text x="264" y="-11">12h</text><text x="330" y="-11">15h</text><text x="396" y="-11">18h</text><text x="462" y="-11">21h</text><text x="528" y="-11">24h</text>
+            </g>
+            <g stroke="#ffffff12">
+              <line x1="0" y1="0" x2="0" y2="136"/><line x1="66" y1="0" x2="66" y2="136"/><line x1="132" y1="0" x2="132" y2="136"/><line x1="198" y1="0" x2="198" y2="136"/><line x1="264" y1="0" x2="264" y2="136"/><line x1="330" y1="0" x2="330" y2="136"/><line x1="396" y1="0" x2="396" y2="136"/><line x1="462" y1="0" x2="462" y2="136"/><line x1="528" y1="0" x2="528" y2="136"/>
+            </g>
+            <g fill="#eaeaf8" font-size="12" font-weight="800" text-anchor="end">
+              <text x="-16" y="20">🇦🇺 Sydney</text>
+              <text x="-16" y="54">🇯🇵 Tokyo</text>
+              <text x="-16" y="88">🇬🇧 Londres</text>
+              <text x="-16" y="122">🇺🇸 New York</text>
+            </g>
+            <g>
+              <rect x="0" y="5" width="44" height="24" rx="9" fill="url(#g-syd)"/>
+              <rect x="462" y="5" width="66" height="24" rx="9" fill="url(#g-syd)"/>
+              <rect x="0" y="39" width="66" height="24" rx="9" fill="url(#g-tok)"/>
+              <rect x="462" y="39" width="66" height="24" rx="9" fill="url(#g-tok)"/>
+              <rect x="66" y="73" width="187" height="24" rx="9" fill="url(#g-lon)"/>
+              <rect x="209" y="107" width="143" height="24" rx="9" fill="url(#g-ny)"/>
+              <rect x="209" y="68" width="55" height="68" rx="6" fill="#f5c5182b" stroke="#f5c51880"/>
+              <line x1="313" y1="-8" x2="313" y2="140" stroke="#fff" stroke-width="3" filter="url(#softGlow)"/>
+              <rect x="274" y="31" width="78" height="21" rx="10" fill="#fff"/>
+              <text x="313" y="45" font-size="8" font-weight="900" letter-spacing="1.5" text-anchor="middle" fill="#07070f">AGORA</text>
+            </g>
+          </g>
         </svg>
 
         <!-- glass overlay -->
@@ -3210,16 +3309,15 @@ function buildStatusGrid() {
 function buildTimeline() {
   const inner = document.getElementById("tl-inner");
 
-  // Hour labels (00 03 06 09 12 15 18 21) — these are positions on a 24h grid
-  const hourLabels = Array.from({ length: 8 }, (_, i) => {
-    const h = i * 3;
+  // Hour labels (00h–23h) — linha do tempo completa de 24 horas
+  const hourLabels = Array.from({ length: 24 }, (_, h) => {
     return `<div class="tl-hour">${String(h).padStart(2,"0")}h</div>`;
   });
 
   let html = `
     <div class="tl-hour-row">${hourLabels.join("")}</div>
     <div style="position:relative">
-      <div class="tl-grid">${Array(8).fill('<div class="tl-grid-line"></div>').join("")}</div>
+      <div class="tl-grid">${Array(24).fill('<div class="tl-grid-line"></div>').join("")}</div>
       <div class="tl-rows">
   `;
 
