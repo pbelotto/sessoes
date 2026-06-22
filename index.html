@@ -2527,25 +2527,35 @@
   }
 }
 
-  
 
 /* ============================================================
-   V10 — LAYOUT FINAL + SCROLL CONTROLADO
-   - Mercados acompanhados sobe no fluxo da página
-   - Timeline 24h e timeline de ativos têm rolagem própria no mobile
-   - Página inteira não cria rolagem horizontal
-   - Cards de relógios e bolsas ficam em uma linha no desktop
+   V11 — CORREÇÃO DE LAYOUT DEFINITIVA
+   - Página geral nunca rola horizontalmente
+   - Timelines rolam apenas dentro do próprio card quando necessário
+   - No desktop as timelines ocupam a largura do card
+   - Relógios Globais + Bolsas do Mundo ficam lado a lado no desktop
 ============================================================ */
-html, body, #app {
+html,
+body,
+#app {
+  width: 100% !important;
   max-width: 100% !important;
   overflow-x: hidden !important;
 }
 
-.wrap,
+.wrap {
+  max-width: 1280px !important;
+  width: 100% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
 .market-map-hero,
 .section,
 .timeline-card,
-.asset-timeline-card {
+.asset-timeline-card,
+.market-info-grid,
+.partner-card {
   max-width: 100% !important;
 }
 
@@ -2554,6 +2564,7 @@ html, body, #app {
   overflow: hidden !important;
 }
 
+/* Scroll interno: só o card rola, nunca a página inteira */
 .market-map-card .timeline-scroll,
 .asset-timeline-scroll {
   width: 100% !important;
@@ -2565,59 +2576,95 @@ html, body, #app {
   touch-action: pan-x pan-y !important;
 }
 
+/* Desktop: ocupa o card. Mobile: mantém largura mínima para scroll interno */
 .market-map-card .timeline-inner {
-  min-width: 920px !important;
-  width: 920px !important;
+  width: 100% !important;
+  min-width: 980px !important;
   max-width: none !important;
 }
 
 .asset-timeline-inner {
-  min-width: 940px !important;
-  width: 940px !important;
+  width: 100% !important;
+  min-width: 1040px !important;
   max-width: none !important;
 }
 
-.market-map-hint {
-  display: inline-flex !important;
-}
-
+/* Agora não invade os horários */
 .market-map-card .tl-now-line {
-  top: 0 !important;
+  top: 2px !important;
   bottom: 0 !important;
 }
 
-.market-map-card .tl-now-line::before {
-  content: "AGORA" !important;
-  top: 7px !important;
-  padding: 3px 7px !important;
-  font-size: 8px !important;
-  line-height: 1 !important;
+.market-map-card .tl-now-line::before,
+.asset-now-line::before {
+  top: 6px !important;
+  z-index: 12 !important;
 }
 
 .market-map-card .tl-row:not(:first-child) .tl-now-line::before {
   display: none !important;
 }
 
-@media (min-width: 1024px) {
-  .clocks-grid {
-    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
-  }
+.asset-marker::after {
+  top: -16px !important;
+}
 
-  .sessions-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-  }
+/* Relógios + Bolsas lado a lado */
+.market-info-grid {
+  display: grid !important;
+  grid-template-columns: minmax(300px, .85fr) minmax(520px, 1.35fr) !important;
+  gap: 22px !important;
+  align-items: start !important;
+  margin-bottom: 44px !important;
+}
 
-  .session-card {
-    min-height: 100% !important;
+.market-info-grid .section {
+  margin-bottom: 0 !important;
+  padding: 0 !important;
+}
+
+.market-info-grid .section-header {
+  margin-bottom: 18px !important;
+}
+
+.market-info-grid .clocks-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+
+.market-info-grid .sessions-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+}
+
+.market-info-grid .clock-card,
+.market-info-grid .session-card {
+  min-width: 0 !important;
+}
+
+/* Cards de ativos por sessão continuam em linha no desktop */
+.asset-session-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+@media (min-width: 1281px) {
+  .market-map-card .timeline-inner,
+  .asset-timeline-inner {
+    min-width: 100% !important;
   }
 }
 
-@media (max-width: 900px) {
-  .clocks-grid {
+@media (max-width: 980px) {
+  .market-info-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .market-info-grid .clocks-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   }
-
-  .sessions-grid {
+  .market-info-grid .sessions-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .asset-session-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 }
@@ -2628,30 +2675,14 @@ html, body, #app {
     padding-right: 14px !important;
   }
 
-  .market-map-hint {
-    display: inline-flex !important;
-    width: 100%;
-    justify-content: center;
-    font-size: 11px !important;
-  }
-
-  .market-map-card .timeline-scroll,
-  .asset-timeline-scroll {
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    scrollbar-width: thin;
-  }
-
   .market-map-card .timeline-inner {
-    min-width: 780px !important;
-    width: 780px !important;
-    max-width: none !important;
+    min-width: 920px !important;
+    width: 920px !important;
   }
 
   .asset-timeline-inner {
-    min-width: 860px !important;
-    width: 860px !important;
-    max-width: none !important;
+    min-width: 980px !important;
+    width: 980px !important;
   }
 
   .market-map-card .tl-hour-row {
@@ -2664,18 +2695,23 @@ html, body, #app {
 
   .market-map-card .tl-row-label {
     width: 96px !important;
-    font-size: 11px !important;
     padding-right: 10px !important;
+    font-size: 10px !important;
   }
 
   .market-map-card .tl-bar::after {
-    font-size: 9px !important;
+    font-size: 8.5px !important;
+    letter-spacing: .06em !important;
   }
 
-  .clocks-grid,
-  .sessions-grid,
+  .market-info-grid .clocks-grid,
+  .market-info-grid .sessions-grid,
   .asset-session-grid {
     grid-template-columns: 1fr !important;
+  }
+
+  .market-map-hint span:last-child {
+    font-size: 11px !important;
   }
 }
 
@@ -3053,41 +3089,6 @@ html, body, #app {
       <span class="badge badge-g" style="flex-shrink:0;align-self:flex-start;margin-top:2px">Gratuito</span>
     </div>
 
-    <div class="divider"></div>
-
-    <!-- ── ASSET TIMELINE ── -->
-    <section class="section asset-timeline-section">
-      <div class="section-header fade-up asset-section-head">
-        <div>
-          <div class="eyebrow">Linha do tempo dos ativos</div>
-          <h2>Mercados que você realmente acompanha</h2>
-          <p>Inclui Hang Seng com leilão, pré-market, abertura do à vista e intervalo do almoço — convertido para <strong id="asset-tz-label" style="color:var(--t1)">seu fuso</strong>.</p>
-        </div>
-        <div class="next-asset-card card" id="next-asset-card">
-          <div class="next-asset-label">Próximo evento</div>
-          <div class="next-asset-name" id="next-asset-name">—</div>
-          <div class="next-asset-time" id="next-asset-time">—</div>
-        </div>
-      </div>
-
-      <div class="card asset-timeline-card">
-        <div class="asset-timeline-toolbar">
-          <div>
-            <div class="asset-timeline-title">Ativos globais 24h</div>
-            <div class="asset-timeline-sub">No desktop, encaixa no painel. No celular, arraste esta tabela para o lado.</div>
-          </div>
-          <span class="badge badge-au">HK50 separado</span>
-        </div>
-        <div class="asset-timeline-scroll">
-          <div class="asset-timeline-inner" id="asset-timeline-inner">
-            <!-- JS populated -->
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <div class="divider"></div>
-
     <!-- ── SESSION STATUS ── -->
     <section class="section">
       <div class="section-header fade-up">
@@ -3142,31 +3143,30 @@ html, body, #app {
       </div>
     </section>
 
-    <!-- ── GLOBAL CLOCKS ── -->
-    <section class="section">
-      <div class="section-header fade-up">
-        <div class="eyebrow">Relógios Globais</div>
-        <h2>Hora ao redor do mundo</h2>
-        <p>Atualização em tempo real · a cada segundo</p>
-      </div>
-      <div class="clocks-grid" id="clocks-grid">
-        <!-- JS populated -->
-      </div>
-    </section>
+    <!-- ── GLOBAL CLOCKS + SESSIONS — lado a lado no desktop ── -->
+    <div class="market-info-grid">
+      <section class="section market-info-section clocks-panel">
+        <div class="section-header fade-up">
+          <div class="eyebrow">Relógios Globais</div>
+          <h2>Hora ao redor do mundo</h2>
+          <p>Atualização em tempo real · a cada segundo</p>
+        </div>
+        <div class="clocks-grid" id="clocks-grid">
+          <!-- JS populated -->
+        </div>
+      </section>
 
-    <div class="divider"></div>
-
-    <!-- ── SESSIONS CARDS ── -->
-    <section class="section">
-      <div class="section-header fade-up">
-        <div class="eyebrow">Sessões de Mercado</div>
-        <h2>Bolsas do mundo</h2>
-        <p>Horários oficiais convertidos para <strong id="sess-tz-label" style="color:var(--t1)">seu fuso</strong></p>
-      </div>
-      <div class="sessions-grid" id="sess-grid">
-        <!-- JS populated -->
-      </div>
-    </section>
+      <section class="section market-info-section sessions-panel">
+        <div class="section-header fade-up">
+          <div class="eyebrow">Sessões de Mercado</div>
+          <h2>Bolsas do mundo</h2>
+          <p>Horários oficiais convertidos para <strong id="sess-tz-label" style="color:var(--t1)">seu fuso</strong></p>
+        </div>
+        <div class="sessions-grid" id="sess-grid">
+          <!-- JS populated -->
+        </div>
+      </section>
+    </div>
 
     <div class="divider"></div>
 
@@ -3185,7 +3185,36 @@ html, body, #app {
 
     <div class="divider"></div>
 
+    <!-- ── ASSET TIMELINE ── -->
+    <section class="section asset-timeline-section">
+      <div class="section-header fade-up asset-section-head">
+        <div>
+          <div class="eyebrow">Linha do tempo dos ativos</div>
+          <h2>Mercados que você realmente acompanha</h2>
+          <p>Inclui Hang Seng com leilão, pré-market, abertura do à vista e intervalo do almoço — convertido para <strong id="asset-tz-label" style="color:var(--t1)">seu fuso</strong>.</p>
+        </div>
+        <div class="next-asset-card card" id="next-asset-card">
+          <div class="next-asset-label">Próximo evento</div>
+          <div class="next-asset-name" id="next-asset-name">—</div>
+          <div class="next-asset-time" id="next-asset-time">—</div>
+        </div>
+      </div>
 
+      <div class="card asset-timeline-card">
+        <div class="asset-timeline-toolbar">
+          <div>
+            <div class="asset-timeline-title">Ativos globais 24h</div>
+            <div class="asset-timeline-sub">No desktop, ajusta na largura. No celular, arraste para o lado.</div>
+          </div>
+          <span class="badge badge-au">HK50 separado</span>
+        </div>
+        <div class="asset-timeline-scroll">
+          <div class="asset-timeline-inner" id="asset-timeline-inner">
+            <!-- JS populated -->
+          </div>
+        </div>
+      </div>
+    </section>
 
 
     <!-- TICKMILL PARTNER CARD -->
