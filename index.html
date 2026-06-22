@@ -2399,6 +2399,134 @@
   .market-map-card .timeline-inner { min-width: 780px; }
 }
 
+
+/* ============================================================
+   V8 — FIX TIMELINE LABEL + MOBILE FIXED VIEW
+   - Remove overlap of "VOCÊ ESTÁ AQUI" over hour labels
+   - Keep main 24h timeline fixed on mobile, without horizontal dragging
+============================================================ */
+.market-map-card .timeline-scroll {
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+}
+
+.market-map-card .timeline-inner {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.market-map-card .tl-now-line {
+  top: 0 !important;
+  bottom: 0 !important;
+}
+
+.market-map-card .tl-now-line::before {
+  content: "AGORA" !important;
+  top: 7px !important;
+  padding: 3px 7px !important;
+  font-size: 8px !important;
+  letter-spacing: .08em !important;
+  line-height: 1 !important;
+  background: rgba(255,255,255,.96) !important;
+  color: #07070f !important;
+  box-shadow: 0 6px 18px rgba(255,255,255,.18) !important;
+}
+
+.market-map-card .tl-row:not(:first-child) .tl-now-line::before {
+  display: none !important;
+}
+
+@media (max-width: 640px) {
+  .timeline-card.market-map-card {
+    padding: 16px 10px 18px !important;
+  }
+
+  .market-map-toolbar {
+    margin-bottom: 14px !important;
+  }
+
+  .market-map-hint {
+    display: none !important;
+  }
+
+  .market-map-card .timeline-scroll {
+    overflow-x: hidden !important;
+    overflow-y: hidden !important;
+    touch-action: pan-y !important;
+  }
+
+  .market-map-card .timeline-inner {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .market-map-card .tl-hour-row {
+    padding-left: 72px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .market-map-card .tl-grid {
+    left: 72px !important;
+    top: 26px !important;
+  }
+
+  .market-map-card .tl-row-label {
+    width: 72px !important;
+    min-width: 72px !important;
+    padding-right: 7px !important;
+    font-size: 9.5px !important;
+    line-height: 1.05 !important;
+    white-space: nowrap !important;
+  }
+
+  .market-map-card .tl-hour {
+    font-size: 6.2px !important;
+    letter-spacing: -.04em !important;
+    color: rgba(255,255,255,.42) !important;
+  }
+
+  .market-map-card .tl-rows {
+    gap: 8px !important;
+  }
+
+  .market-map-card .tl-track {
+    height: 34px !important;
+    border-radius: 10px !important;
+  }
+
+  .market-map-card .tl-bar {
+    top: 5px !important;
+    height: 24px !important;
+    border-radius: 8px !important;
+  }
+
+  .market-map-card .tl-bar::after {
+    font-size: 6.4px !important;
+    letter-spacing: .04em !important;
+  }
+
+  .market-map-card .tl-now-line {
+    width: 2px !important;
+  }
+
+  .market-map-card .tl-now-line::before {
+    content: "" !important;
+    display: none !important;
+  }
+
+  .market-map-legend {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0,1fr)) !important;
+    gap: 8px 10px !important;
+  }
+
+  .market-map-legend .tl-legend-item {
+    font-size: 10px !important;
+  }
+}
+
   </style>
 </head>
 <body>
