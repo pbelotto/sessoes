@@ -2715,6 +2715,108 @@ body,
   }
 }
 
+
+/* ============================================================
+   V12 — RELÓGIOS E BOLSAS EM BLOCOS SEPARADOS
+   - Relógios Globais: uma linha no desktop
+   - Bolsas do Mundo: uma linha no desktop
+   - No mobile, cada bloco rola dentro dele, sem rolagem na página
+============================================================ */
+.market-info-grid {
+  display: block !important;
+  margin-bottom: 44px !important;
+}
+
+.market-info-grid .section {
+  width: 100% !important;
+  margin-bottom: 42px !important;
+  padding: 0 !important;
+}
+
+.market-info-grid .section-header {
+  margin-bottom: 18px !important;
+}
+
+.market-info-grid .clocks-grid {
+  display: grid !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.market-info-grid .sessions-grid {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.market-info-grid .clock-card,
+.market-info-grid .session-card {
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+.market-info-grid .session-card {
+  padding: 22px !important;
+}
+
+.market-info-grid .sess-name {
+  font-size: 16px !important;
+}
+
+.market-info-grid .sess-hours {
+  font-size: 13px !important;
+}
+
+.market-info-grid .sess-desc {
+  font-size: 12px !important;
+}
+
+.market-info-grid .tag {
+  font-size: 10px !important;
+  padding: 3px 7px !important;
+}
+
+@media (max-width: 1180px) {
+  .market-info-grid .clocks-grid,
+  .market-info-grid .sessions-grid {
+    display: flex !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-x: contain !important;
+    padding-bottom: 8px !important;
+    scroll-snap-type: x proximity !important;
+  }
+
+  .market-info-grid .clock-card {
+    flex: 0 0 180px !important;
+    scroll-snap-align: start !important;
+  }
+
+  .market-info-grid .session-card {
+    flex: 0 0 250px !important;
+    scroll-snap-align: start !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .market-info-grid .section {
+    margin-bottom: 34px !important;
+  }
+
+  .market-info-grid .clock-card {
+    flex-basis: 160px !important;
+  }
+
+  .market-info-grid .session-card {
+    flex-basis: 235px !important;
+  }
+}
+
   </style>
 </head>
 <body>
