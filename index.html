@@ -2399,6 +2399,53 @@
   .market-map-card .timeline-inner { min-width: 780px; }
 }
 
+
+/* ============================================================
+   V6 — ORDEM OPERACIONAL + GRIDS SEM QUEBRA NO DESKTOP
+============================================================ */
+.asset-timeline-section { margin-top: 0; }
+
+@media (min-width: 1050px) {
+  .sessions-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .session-card {
+    padding: 22px 20px;
+    min-height: 288px;
+  }
+
+  .sess-flag { font-size: 25px; }
+  .sess-name { font-size: 17px; }
+  .sess-hours { font-size: 13px; }
+  .sess-desc { font-size: 12.4px; line-height: 1.52; }
+  .sess-tags { gap: 4px; }
+  .tag { font-size: 10.5px; padding: 3px 8px; }
+
+  .clocks-grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .clock-card {
+    padding: 18px 10px;
+    min-width: 0;
+  }
+
+  .clock-city { font-size: 9px; }
+  .clock-time { font-size: 17px; }
+  .clock-tz { font-size: 8.5px; overflow-wrap: anywhere; }
+
+  .asset-timeline-scroll { overflow-x: hidden; overflow-y: hidden; }
+  .asset-timeline-inner { min-width: 0; width: 100%; }
+}
+
+@media (min-width: 641px) and (max-width: 1049px) {
+  .sessions-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .clocks-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
   </style>
 </head>
 <body>
@@ -2773,6 +2820,42 @@
       <span class="badge badge-g" style="flex-shrink:0;align-self:flex-start;margin-top:2px">Gratuito</span>
     </div>
 
+    <div class="divider"></div>
+
+    <!-- ── ASSET TIMELINE ── -->
+    <section class="section asset-timeline-section">
+      <div class="section-header fade-up asset-section-head">
+        <div>
+          <div class="eyebrow">Mercados acompanhados</div>
+          <h2>Mercados que você realmente acompanha</h2>
+          <p>Veja primeiro os ativos operacionais: HK50, JP225, GER40, NAS100, US30, Ouro e Forex — com Hang Seng separado por leilão, pré-market, abertura do à vista e intervalo do almoço. Tudo convertido para <strong id="asset-tz-label" style="color:var(--t1)">seu fuso</strong>.</p>
+        </div>
+        <div class="next-asset-card card" id="next-asset-card">
+          <div class="next-asset-label">Próximo evento</div>
+          <div class="next-asset-name" id="next-asset-name">—</div>
+          <div class="next-asset-time" id="next-asset-time">—</div>
+        </div>
+      </div>
+
+      <div class="card asset-timeline-card">
+        <div class="asset-timeline-toolbar">
+          <div>
+            <div class="asset-timeline-title">Linha do tempo operacional 24h</div>
+            <div class="asset-timeline-sub">No desktop, ajusta na largura. No celular, arraste para o lado.</div>
+          </div>
+          <span class="badge badge-au">HK50 separado</span><span class="badge badge-g">Visão principal</span>
+        </div>
+        <div class="asset-timeline-scroll">
+          <div class="asset-timeline-inner" id="asset-timeline-inner">
+            <!-- JS populated -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+
+
     <!-- ── SESSION STATUS ── -->
     <section class="section">
       <div class="section-header fade-up">
@@ -2867,41 +2950,6 @@
         <!-- JS populated -->
       </div>
     </section>
-
-    <div class="divider"></div>
-
-    <!-- ── ASSET TIMELINE ── -->
-    <section class="section asset-timeline-section">
-      <div class="section-header fade-up asset-section-head">
-        <div>
-          <div class="eyebrow">Linha do tempo dos ativos</div>
-          <h2>Mercados que você realmente acompanha</h2>
-          <p>Inclui Hang Seng com leilão, pré-market, abertura do à vista e intervalo do almoço — convertido para <strong id="asset-tz-label" style="color:var(--t1)">seu fuso</strong>.</p>
-        </div>
-        <div class="next-asset-card card" id="next-asset-card">
-          <div class="next-asset-label">Próximo evento</div>
-          <div class="next-asset-name" id="next-asset-name">—</div>
-          <div class="next-asset-time" id="next-asset-time">—</div>
-        </div>
-      </div>
-
-      <div class="card asset-timeline-card">
-        <div class="asset-timeline-toolbar">
-          <div>
-            <div class="asset-timeline-title">Ativos globais 24h</div>
-            <div class="asset-timeline-sub">No desktop, ajusta na largura. No celular, arraste para o lado.</div>
-          </div>
-          <span class="badge badge-au">HK50 separado</span>
-        </div>
-        <div class="asset-timeline-scroll">
-          <div class="asset-timeline-inner" id="asset-timeline-inner">
-            <!-- JS populated -->
-          </div>
-        </div>
-      </div>
-    </section>
-
-
     <!-- TICKMILL PARTNER CARD -->
     <div class="partner-card fade-up">
       <div class="partner-badge">🤝 Parceiro Oficial</div>
