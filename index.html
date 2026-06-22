@@ -2130,59 +2130,274 @@
 }
 
 
+
+
 /* ============================================================
-   HOTFIX V4 — remove rolagem vertical interna da timeline
-   Motivo: overflow-x hidden/auto + elementos com top negativo
-   fazia o navegador criar uma área rolável vertical dentro do card.
+   V5 — GLOBAL SESSIONS + ASSET INTELLIGENCE
 ============================================================ */
-.timeline-card.market-map-card,
-.market-map-card .timeline-scroll,
-.timeline-scroll {
-  overflow-y: hidden !important;
+.market-map-card .timeline-scroll { overflow-x: hidden; overflow-y: hidden; }
+.market-map-card .timeline-inner { min-width: 100%; width: 100%; }
+.market-map-card .tl-now-line { top: 0; bottom: 0; }
+.market-map-card .tl-now-line::before { top: 6px; }
+.market-map-card .tl-row:not(:first-child) .tl-now-line::before { display: none; }
+.market-map-legend .tl-legend-dot.hongkong { background: linear-gradient(90deg, #ef4444, #f97316); }
+.market-map-card .tl-bar-hongkong {
+  background: linear-gradient(90deg, #ef4444, #f97316);
+  border: 1px solid rgba(239,68,68,.5);
 }
-
-@media (min-width: 641px) {
-  .market-map-card .timeline-scroll {
-    overflow-x: hidden !important;
-    overflow-y: hidden !important;
-  }
+.asset-intelligence-section { margin-top: 10px; }
+.asset-session-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
 }
-
-.market-map-card .tl-track {
-  overflow: hidden !important;
+.asset-session-card {
+  position: relative;
+  overflow: hidden;
+  padding: 22px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255,255,255,.052), rgba(255,255,255,.024));
+  border: 1px solid rgba(255,255,255,.09);
 }
-
-.market-map-card .tl-overlap {
-  top: 0 !important;
-  bottom: 0 !important;
+.asset-session-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 65% at 85% 0%, var(--session-glow), transparent 68%);
+  pointer-events: none;
 }
-
-.market-map-card .tl-overlap::after {
-  top: 4px !important;
-  font-size: 7px !important;
-  opacity: .85;
+.asset-session-top {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 16px;
 }
-
-.market-map-card .tl-now-line {
-  top: 0 !important;
-  bottom: 0 !important;
+.asset-session-name {
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: -.02em;
 }
-
-.market-map-card .tl-row:not(:first-child) .tl-now-line::before {
-  display: none !important;
+.asset-session-time {
+  font-size: 11px;
+  color: var(--t3);
+  font-family: "SF Mono","Fira Code",monospace;
 }
-
-.market-map-card .tl-now-line::before {
-  top: 6px !important;
-  transform: translateX(-50%) !important;
+.asset-chip-list {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.asset-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(255,255,255,.08);
+  color: var(--t2);
+  font-size: 12px;
+  font-weight: 700;
+}
+.asset-chip.primary {
+  color: var(--t1);
+  border-color: rgba(0,232,122,.22);
+  background: rgba(0,232,122,.06);
+}
+.asset-section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+}
+.next-asset-card {
+  min-width: 245px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: rgba(245,197,24,.055);
+  border-color: rgba(245,197,24,.22);
+}
+.next-asset-label {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+.next-asset-name {
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: -.02em;
+}
+.next-asset-time {
+  margin-top: 5px;
+  font-size: 12px;
+  color: var(--t2);
+  font-family: "SF Mono","Fira Code",monospace;
+}
+.asset-timeline-card {
+  padding: 24px 22px;
+  border-radius: 22px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(255,255,255,.052), rgba(255,255,255,.024));
+  border: 1px solid rgba(255,255,255,.11);
+}
+.asset-timeline-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.asset-timeline-title {
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--green);
+  font-weight: 950;
+}
+.asset-timeline-sub {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--t3);
+}
+.asset-timeline-scroll {
+  overflow-x: hidden;
+  overflow-y: hidden;
+  width: 100%;
+}
+.asset-timeline-inner {
+  min-width: 100%;
+  width: 100%;
+  position: relative;
+}
+.asset-hour-row {
+  display: grid;
+  grid-template-columns: 118px repeat(24, 1fr);
+  margin-bottom: 10px;
+}
+.asset-hour-spacer { width: 118px; }
+.asset-hour {
+  font-size: 10px;
+  color: rgba(255,255,255,.34);
+  font-family: "SF Mono","Fira Code",monospace;
+  font-weight: 800;
+}
+.asset-rows {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.asset-row {
+  display: flex;
+  align-items: center;
+}
+.asset-row-label {
+  width: 118px;
+  padding-right: 14px;
+  flex-shrink: 0;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--t1);
+}
+.asset-track {
+  position: relative;
+  flex: 1;
+  height: 36px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,.048), rgba(255,255,255,.02));
+  border: 1px solid rgba(255,255,255,.055);
+  overflow: hidden;
+}
+.asset-track::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.055) 0 1px, transparent 1px calc(100% / 24));
+  opacity: .55;
+  pointer-events: none;
+}
+.asset-bar {
+  position: absolute;
+  top: 6px;
+  height: 23px;
+  border-radius: 999px;
+  background: var(--asset-color);
+  box-shadow: 0 0 18px var(--asset-glow), inset 0 1px 0 rgba(255,255,255,.25);
+  border: 1px solid rgba(255,255,255,.18);
+  z-index: 2;
+}
+.asset-marker {
+  position: absolute;
+  top: 3px;
+  width: 2px;
+  height: 30px;
+  background: rgba(255,255,255,.85);
+  border-radius: 2px;
+  z-index: 4;
+}
+.asset-marker::after {
+  content: attr(data-label);
+  position: absolute;
+  left: 50%;
+  top: -18px;
+  transform: translateX(-50%);
+  font-size: 8px;
   white-space: nowrap;
+  color: rgba(255,255,255,.7);
+  background: rgba(7,7,15,.82);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 999px;
+  padding: 2px 6px;
 }
-
-.market-map-card .tl-rows {
-  padding-top: 2px !important;
-  padding-bottom: 2px !important;
+.asset-now-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(255,255,255,.9);
+  box-shadow: 0 0 14px rgba(255,255,255,.65);
+  z-index: 6;
 }
-
+.asset-now-line::before {
+  content: 'AGORA';
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8px;
+  font-weight: 950;
+  color: #07070f;
+  background: #fff;
+  border-radius: 999px;
+  padding: 3px 7px;
+}
+.asset-row:not(:first-child) .asset-now-line::before { display:none; }
+.market-closed-day .asset-bar { opacity: .25; filter: grayscale(.5); }
+.market-closed-day .asset-marker { opacity: .25; }
+@media (max-width: 900px) {
+  .asset-session-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .asset-section-head { align-items: flex-start; flex-direction: column; }
+  .next-asset-card { width: 100%; min-width: 0; }
+  .asset-session-grid { grid-template-columns: 1fr; }
+  .asset-timeline-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .asset-timeline-inner { min-width: 820px; }
+  .asset-hour-row { grid-template-columns: 104px repeat(24, 1fr); }
+  .asset-hour-spacer, .asset-row-label { width: 104px; }
+  .asset-row-label { font-size: 11px; padding-right: 10px; }
+  .asset-marker::after { display: none; }
+  .market-map-card .timeline-scroll { overflow-x: auto; }
+  .market-map-card .timeline-inner { min-width: 780px; }
+}
 
   </style>
 </head>
@@ -2447,6 +2662,7 @@
             <option value="Europe/London">🇬🇧 Londres</option>
             <option value="Europe/Madrid">🇪🇸 Madrid</option>
             <option value="Asia/Tokyo">🇯🇵 Tokyo</option>
+            <option value="Asia/Hong_Kong">🇭🇰 Hong Kong</option>
             <option value="Australia/Sydney">🇦🇺 Sydney</option>
             <option value="UTC">🌍 UTC</option>
           </select>
@@ -2518,6 +2734,7 @@
         <div class="tl-legend market-map-legend">
           <div class="tl-legend-item"><div class="tl-legend-dot sydney"></div>Sydney</div>
           <div class="tl-legend-item"><div class="tl-legend-dot tokyo"></div>Tokyo</div>
+          <div class="tl-legend-item"><div class="tl-legend-dot hongkong"></div>Hong Kong</div>
           <div class="tl-legend-item"><div class="tl-legend-dot london"></div>Londres</div>
           <div class="tl-legend-item"><div class="tl-legend-dot newyork"></div>New York</div>
           <div class="tl-legend-item"><div class="tl-legend-overlap"></div>Sobreposição Londres + NY</div>
@@ -2526,12 +2743,12 @@
         <div class="market-overlaps">
           <div class="overlap-pill">
             <strong>Ásia</strong>
-            <span>Sydney + Tokyo</span>
+            <span>Sydney + Tokyo + Hong Kong</span>
           </div>
 
           <div class="overlap-pill">
             <strong>Europa</strong>
-            <span>Tokyo fechando + Londres abrindo</span>
+            <span>Ásia fechando + Londres abrindo</span>
           </div>
 
           <div class="overlap-pill hot">
@@ -2633,6 +2850,54 @@
       </div>
       <div class="sessions-grid" id="sess-grid">
         <!-- JS populated -->
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ── ASSETS BY SESSION ── -->
+    <section class="section asset-intelligence-section">
+      <div class="section-header fade-up">
+        <div class="eyebrow">Ativos por sessão</div>
+        <h2>Quais ativos costumam ganhar força em cada janela</h2>
+        <p>Você continua vendo as bolsas globais, mas agora também enxerga onde normalmente aparece mais liquidez para operar.</p>
+      </div>
+
+      <div class="asset-session-grid" id="asset-session-grid">
+        <!-- JS populated -->
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ── ASSET TIMELINE ── -->
+    <section class="section asset-timeline-section">
+      <div class="section-header fade-up asset-section-head">
+        <div>
+          <div class="eyebrow">Linha do tempo dos ativos</div>
+          <h2>Mercados que você realmente acompanha</h2>
+          <p>Inclui Hang Seng com leilão, pré-market, abertura do à vista e intervalo do almoço — convertido para <strong id="asset-tz-label" style="color:var(--t1)">seu fuso</strong>.</p>
+        </div>
+        <div class="next-asset-card card" id="next-asset-card">
+          <div class="next-asset-label">Próximo evento</div>
+          <div class="next-asset-name" id="next-asset-name">—</div>
+          <div class="next-asset-time" id="next-asset-time">—</div>
+        </div>
+      </div>
+
+      <div class="card asset-timeline-card">
+        <div class="asset-timeline-toolbar">
+          <div>
+            <div class="asset-timeline-title">Ativos globais 24h</div>
+            <div class="asset-timeline-sub">No desktop, ajusta na largura. No celular, arraste para o lado.</div>
+          </div>
+          <span class="badge badge-au">HK50 separado</span>
+        </div>
+        <div class="asset-timeline-scroll">
+          <div class="asset-timeline-inner" id="asset-timeline-inner">
+            <!-- JS populated -->
+          </div>
+        </div>
       </div>
     </section>
 
@@ -2837,8 +3102,26 @@ const SESSIONS = [
     barClass: "tl-bar-tokyo",
     badgeCls: "badge-or",
     dotCls: "dot-or",
-    desc: "Importante para JPY, Nikkei e Hang Seng. Movimentos moderados e direcionais.",
-    assets: ["USD/JPY", "Nikkei 225", "Hang Seng"],
+    desc: "Importante para JPY, Nikkei e fluxo asiático japonês. Movimentos moderados e direcionais.",
+    assets: ["USD/JPY", "Nikkei 225", "JP225"],
+    glowClass: "",
+    ruleClass: "card-rule-orange",
+    accentClass: "card-accent-orange",
+  },
+  {
+    id: "hongkong",
+    name: "Hong Kong",
+    flag: "🇭🇰",
+    icon: "🐉",
+    tz: "Asia/Hong_Kong",
+    open: [9, 30],
+    close: [16, 0],
+    color: "var(--red)",
+    barClass: "tl-bar-hongkong",
+    badgeCls: "badge-rd",
+    dotCls: "dot-rd",
+    desc: "Sessão do Hang Seng. Para Miami: 21:00 leilão, 21:15 pré-market e 21:30 abertura do à vista.",
+    assets: ["HK50", "Hang Seng", "HSI"],
     glowClass: "",
     ruleClass: "card-rule-orange",
     accentClass: "card-accent-orange",
@@ -2957,6 +3240,138 @@ const BEST_HOURS = [
   },
 ];
 
+
+
+// ─── DATA: ATIVOS POR SESSÃO ─────────────────────────────────
+const SESSION_ASSET_GROUPS = [
+  {
+    name: "Ásia",
+    icon: "🌏",
+    time: "Sydney · Tokyo · Hong Kong",
+    glow: "rgba(249,115,22,.12)",
+    assets: [
+      { label: "🇭🇰 HK50", primary: true },
+      { label: "🇯🇵 JP225", primary: true },
+      { label: "💴 USDJPY", primary: false },
+      { label: "🇦🇺 AUDUSD", primary: false },
+    ],
+  },
+  {
+    name: "Europa",
+    icon: "🇪🇺",
+    time: "Londres · Frankfurt",
+    glow: "rgba(0,232,122,.12)",
+    assets: [
+      { label: "🇩🇪 GER40", primary: true },
+      { label: "🇪🇺 EURUSD", primary: true },
+      { label: "🇬🇧 GBPUSD", primary: false },
+      { label: "🥇 XAUUSD", primary: false },
+    ],
+  },
+  {
+    name: "Estados Unidos",
+    icon: "🇺🇸",
+    time: "New York · CME",
+    glow: "rgba(124,58,237,.14)",
+    assets: [
+      { label: "📈 NAS100", primary: true },
+      { label: "📊 US30", primary: true },
+      { label: "🇺🇸 S&P 500", primary: false },
+      { label: "🥇 XAUUSD", primary: false },
+    ],
+  },
+  {
+    name: "Quase 24h",
+    icon: "🌍",
+    time: "Futuros · Forex · Ouro",
+    glow: "rgba(245,197,24,.10)",
+    assets: [
+      { label: "🥇 XAUUSD", primary: true },
+      { label: "💱 Forex", primary: true },
+      { label: "📈 NQ/MNQ", primary: false },
+      { label: "📊 YM/MYM", primary: false },
+    ],
+  },
+];
+
+// Horários-base em fuso de origem. O painel converte para o fuso escolhido.
+const ASSET_TIMELINES = [
+  {
+    id: "hk50",
+    name: "🇭🇰 HK50",
+    tz: "Asia/Hong_Kong",
+    color: "linear-gradient(90deg,#ef4444,#f97316)",
+    glow: "rgba(239,68,68,.35)",
+    segments: [
+      { start:[9,30], end:[12,0], label:"À vista" },
+      { start:[13,0], end:[16,0], label:"Reabertura" },
+    ],
+    events: [
+      { time:[9,0],  label:"Leilão" },
+      { time:[9,15], label:"Pré" },
+      { time:[9,30], label:"Abertura" },
+      { time:[13,0], label:"Retorno" },
+    ],
+  },
+  {
+    id: "jp225",
+    name: "🇯🇵 JP225",
+    tz: "Asia/Tokyo",
+    color: "linear-gradient(90deg,#f97316,#f5c518)",
+    glow: "rgba(249,115,22,.32)",
+    segments: [
+      { start:[9,0], end:[11,30], label:"Manhã" },
+      { start:[12,30], end:[15,0], label:"Tarde" },
+    ],
+    events: [{ time:[9,0], label:"Abertura" }, { time:[12,30], label:"Retorno" }],
+  },
+  {
+    id: "ger40",
+    name: "🇩🇪 GER40",
+    tz: "Europe/Berlin",
+    color: "linear-gradient(90deg,#00e87a,#8affc1)",
+    glow: "rgba(0,232,122,.30)",
+    segments: [{ start:[9,0], end:[17,30], label:"Europa" }],
+    events: [{ time:[9,0], label:"Abertura" }],
+  },
+  {
+    id: "nas100",
+    name: "🇺🇸 NAS100",
+    tz: "America/New_York",
+    color: "linear-gradient(90deg,#7c3aed,#d946ef)",
+    glow: "rgba(124,58,237,.34)",
+    segments: [{ start:[9,30], end:[16,0], label:"Cash" }],
+    events: [{ time:[9,30], label:"Abertura" }, { time:[15,0], label:"Power" }],
+  },
+  {
+    id: "us30",
+    name: "🇺🇸 US30",
+    tz: "America/New_York",
+    color: "linear-gradient(90deg,#1a7fff,#7c3aed)",
+    glow: "rgba(26,127,255,.30)",
+    segments: [{ start:[9,30], end:[16,0], label:"Cash" }],
+    events: [{ time:[9,30], label:"Abertura" }, { time:[15,0], label:"Power" }],
+  },
+  {
+    id: "xauusd",
+    name: "🥇 XAUUSD",
+    tz: "America/New_York",
+    color: "linear-gradient(90deg,#f5c518,#f97316)",
+    glow: "rgba(245,197,24,.30)",
+    segments: [{ start:[18,0], end:[17,0], label:"Quase 24h" }],
+    events: [{ time:[8,20], label:"COMEX" }, { time:[9,30], label:"NY" }],
+  },
+  {
+    id: "forex",
+    name: "💱 FOREX",
+    tz: "America/New_York",
+    color: "linear-gradient(90deg,#22d3ee,#00e87a)",
+    glow: "rgba(34,211,238,.28)",
+    segments: [{ start:[17,0], end:[17,0], label:"24h" }],
+    events: [{ time:[17,0], label:"Reabre" }],
+  },
+];
+
 // ─── TIMEZONE LABELS ─────────────────────────────────────────
 const TZ_LABELS = {
   "auto":               "Automático",
@@ -2966,6 +3381,7 @@ const TZ_LABELS = {
   "Europe/London":      "Reino Unido — Londres",
   "Europe/Madrid":      "Espanha — Madrid",
   "Asia/Tokyo":         "Japão — Tokyo",
+  "Asia/Hong_Kong":     "Hong Kong",
   "Australia/Sydney":   "Austrália — Sydney",
   "UTC":                "UTC",
 };
@@ -2976,7 +3392,7 @@ const COUNTRY_HINTS = {
   "America/Fortaleza":"Brasil","America/Recife":"Brasil","America/Cuiaba":"Brasil",
   "America/New_York":"EUA","America/Chicago":"EUA","America/Los_Angeles":"EUA",
   "Europe/Lisbon":"Portugal","Europe/London":"Reino Unido","Europe/Madrid":"Espanha",
-  "Asia/Tokyo":"Japão","Australia/Sydney":"Austrália","Europe/Paris":"França",
+  "Asia/Tokyo":"Japão","Asia/Hong_Kong":"Hong Kong","Australia/Sydney":"Austrália","Europe/Paris":"França",
   "Europe/Berlin":"Alemanha","America/Buenos_Aires":"Argentina","America/Bogota":"Colômbia",
   "America/Mexico_City":"México","Asia/Dubai":"Emirados","Asia/Singapore":"Singapura",
 };
@@ -3015,6 +3431,7 @@ function launchApp() {
   buildBestGrid();
   buildTimeline();
   buildStatusGrid();
+  buildAssetSections();
 
   tick();
   tickInterval = setInterval(tick, 1000);
@@ -3057,6 +3474,8 @@ function tick() {
   updateSessionNow();
   updateTimelineNow();
   updateMarketBanner();
+  updateAssetTimelineNow();
+  updateNextAssetEvent();
   onScroll();
 }
 
@@ -3089,7 +3508,7 @@ function updateMarketBanner() {
     dot.className   = "dot dot-g";
     label.textContent = active[0].name.toUpperCase() + " ABERTA";
     label.style.color = active[0].color;
-    const liqMap = { sydney:"Liquidez baixa", tokyo:"Liquidez normal", london:"Alta liquidez", newyork:"Fluxo institucional" };
+    const liqMap = { sydney:"Liquidez baixa", tokyo:"Liquidez normal", hongkong:"HK50 em foco", london:"Alta liquidez", newyork:"Fluxo institucional" };
     detail.textContent = "— " + (liqMap[active[0].id] || "");
   }
 }
@@ -3120,6 +3539,7 @@ function onTzChange(val) {
   buildVolGrid();
   buildBestGrid();
   buildTimeline();
+  buildAssetSections();
 }
 
 function getActiveTzLabel() {
@@ -3143,7 +3563,7 @@ function refreshTzLabels() {
   document.getElementById("tz-bar-detected").textContent = detectedTz;
 
   // Section labels
-  const labels = ["tl-tz-label","sess-tz-label","vol-tz-label","best-tz-label"];
+  const labels = ["tl-tz-label","sess-tz-label","vol-tz-label","best-tz-label","asset-tz-label"];
   labels.forEach(id => {
     const el = document.getElementById(id);
     if (el) el.textContent = label;
@@ -3177,6 +3597,7 @@ const CLOCKS_DEF = [
   { id: "br",    city: "Brasília",       tz: "America/Sao_Paulo",  color: "var(--cyan)"   },
   { id: "lon",   city: "Londres",        tz: "Europe/London",      color: "var(--green)"  },
   { id: "tok",   city: "Tokyo",          tz: "Asia/Tokyo",         color: "var(--orange)" },
+  { id: "hk",    city: "Hong Kong",      tz: "Asia/Hong_Kong",    color: "var(--red)"    },
   { id: "syd",   city: "Sydney",         tz: "Australia/Sydney",   color: "var(--blue)"   },
 ];
 
@@ -3334,7 +3755,7 @@ function updateSessionNow() {
     sessIcon.style.cssText = `background:rgba(${colorToRgb(s.color)},.12);border:1px solid rgba(${colorToRgb(s.color)},.25)`;
     sessBadge.innerHTML   = `<span class="badge ${s.badgeCls}"><span class="dot ${s.dotCls}"></span>Aberta</span>`;
     const liqLevels = { sydney:"Baixa Liquidez", tokyo:"Liquidez Normal", london:"Alta Liquidez", newyork:"Fluxo Institucional" };
-    const liqSubs   = { sydney:"Foco em AUD e NZD", tokyo:"Mercado asiático ativo", london:"Europa em plena atividade", newyork:"Principal sessão do dia" };
+    const liqSubs   = { sydney:"Foco em AUD e NZD", tokyo:"Mercado asiático ativo", hongkong:"Hang Seng / HK50 ativo", london:"Europa em plena atividade", newyork:"Principal sessão do dia" };
     liqLevel.textContent = liqLevels[s.id] || "";
     liqSub.textContent   = liqSubs[s.id] || "";
     safeNav(`${s.name} aberta`);
@@ -3441,12 +3862,14 @@ function buildStatusGrid() {
   const hasNY     = active.some(s => s.id === "newyork");
   const hasLon    = active.some(s => s.id === "london");
   const hasTok    = active.some(s => s.id === "tokyo");
+  const hasHk     = active.some(s => s.id === "hongkong");
   const hasSyd    = active.some(s => s.id === "sydney");
   const noSess    = active.length === 0;
 
   const items = [
     { label: "Baixa Liquidez",          color: "#3a3a5c", glow: false, on: noSess && !isOverlap },
     { label: "Liquidez Normal",         color: "var(--blue)",   glow: true,  on: (hasSyd || hasTok) && active.length === 1 },
+    { label: "Hang Seng Ativo",         color: "var(--red)",    glow: true,  on: hasHk },
     { label: "Alta Liquidez",           color: "var(--green)",  glow: true,  on: hasLon && active.length === 1 },
     { label: "Fluxo Institucional",     color: "var(--purple)", glow: true,  on: hasNY && !isOverlap },
     { label: "Sobreposição Ativa",      color: "var(--gold)",   glow: true,  on: isOverlap },
@@ -3566,6 +3989,173 @@ function updateTimelineNow() {
     }
     line.style.left = pos + "%";
   });
+}
+
+
+
+// ─── BUILD ASSET INTELLIGENCE ────────────────────────────────
+function buildAssetSections() {
+  buildAssetSessionGrid();
+  buildAssetTimeline();
+  updateAssetTimelineNow();
+  updateNextAssetEvent();
+}
+
+function buildAssetSessionGrid() {
+  const grid = document.getElementById("asset-session-grid");
+  if (!grid) return;
+
+  grid.innerHTML = SESSION_ASSET_GROUPS.map((g, i) => `
+    <div class="asset-session-card fade-up" style="--session-glow:${g.glow};animation-delay:${i*.06}s">
+      <div class="asset-session-top">
+        <div>
+          <div class="asset-session-name">${g.icon} ${g.name}</div>
+          <div class="asset-session-time">${g.time}</div>
+        </div>
+      </div>
+      <div class="asset-chip-list">
+        ${g.assets.map(a => `<span class="asset-chip ${a.primary ? "primary" : ""}">${a.label}</span>`).join("")}
+      </div>
+    </div>
+  `).join("");
+}
+
+function buildAssetTimeline() {
+  const inner = document.getElementById("asset-timeline-inner");
+  if (!inner) return;
+
+  const hours = Array.from({ length: 24 }, (_, h) => `<div class="asset-hour">${String(h).padStart(2,"0")}h</div>`).join("");
+
+  let html = `
+    <div class="asset-hour-row"><div class="asset-hour-spacer"></div>${hours}</div>
+    <div class="asset-rows">
+  `;
+
+  ASSET_TIMELINES.forEach(a => {
+    html += `
+      <div class="asset-row">
+        <div class="asset-row-label">${a.name}</div>
+        <div class="asset-track" id="asset-track-${a.id}"></div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+  inner.innerHTML = html;
+  inner.classList.toggle("market-closed-day", isGlobalMarketWeekend());
+
+  renderAssetTimelineBars();
+}
+
+function renderAssetTimelineBars() {
+  ASSET_TIMELINES.forEach(asset => {
+    const track = document.getElementById(`asset-track-${asset.id}`);
+    if (!track) return;
+    track.innerHTML = "";
+
+    asset.segments.forEach(seg => {
+      const startH = decimalHoursInActiveTz(asset.tz, seg.start[0], seg.start[1]);
+      const endH   = decimalHoursInActiveTz(asset.tz, seg.end[0],   seg.end[1]);
+
+      if (seg.start[0] === seg.end[0] && seg.start[1] === seg.end[1]) {
+        track.insertAdjacentHTML("beforeend", assetBar(asset, 0, 24));
+      } else if (endH > startH) {
+        track.insertAdjacentHTML("beforeend", assetBar(asset, startH, endH - startH));
+      } else {
+        track.insertAdjacentHTML("beforeend", assetBar(asset, startH, 24 - startH));
+        track.insertAdjacentHTML("beforeend", assetBar(asset, 0, endH));
+      }
+    });
+
+    (asset.events || []).forEach(ev => {
+      const h = decimalHoursInActiveTz(asset.tz, ev.time[0], ev.time[1]);
+      const marker = document.createElement("div");
+      marker.className = "asset-marker";
+      marker.dataset.label = ev.label;
+      marker.style.left = pct(h) + "%";
+      track.appendChild(marker);
+    });
+  });
+}
+
+function assetBar(asset, startH, durationH) {
+  return `<div class="asset-bar" style="--asset-color:${asset.color};--asset-glow:${asset.glow};left:${pct(startH)}%;width:${pct(durationH)}%"></div>`;
+}
+
+function updateAssetTimelineNow() {
+  const inner = document.getElementById("asset-timeline-inner");
+  if (inner) inner.classList.toggle("market-closed-day", isGlobalMarketWeekend());
+
+  ASSET_TIMELINES.forEach(asset => {
+    const track = document.getElementById(`asset-track-${asset.id}`);
+    if (!track) return;
+
+    const now = DateTime.now().setZone(activeTz);
+    const nowH = now.hour + now.minute / 60 + now.second / 3600;
+
+    let line = track.querySelector(".asset-now-line");
+    if (!line) {
+      line = document.createElement("div");
+      line.className = "asset-now-line";
+      track.appendChild(line);
+    }
+    line.style.left = pct(nowH) + "%";
+  });
+}
+
+function updateNextAssetEvent() {
+  const nameEl = document.getElementById("next-asset-name");
+  const timeEl = document.getElementById("next-asset-time");
+  if (!nameEl || !timeEl) return;
+
+  const next = findNextAssetEvent();
+  if (!next) {
+    nameEl.textContent = "Mercados fechados";
+    timeEl.textContent = "Aguardando próxima janela";
+    return;
+  }
+
+  const totalMin = Math.max(0, Math.floor(next.diff / 60_000));
+  const d = Math.floor(totalMin / 1440);
+  const h = Math.floor((totalMin % 1440) / 60);
+  const m = totalMin % 60;
+  const dayTxt = d > 0 ? `${d}d ` : "";
+
+  nameEl.textContent = `${next.asset.name} · ${next.label}`;
+  timeEl.textContent = `Em ${dayTxt}${h}h ${m}min · ${next.dt.setZone(activeTz).toFormat("HH:mm")}`;
+}
+
+function findNextAssetEvent() {
+  const now = DateTime.now();
+  let best = null;
+
+  ASSET_TIMELINES.forEach(asset => {
+    const events = asset.events && asset.events.length
+      ? asset.events
+      : asset.segments.map(s => ({ time: s.start, label: "Abertura" }));
+
+    events.forEach(ev => {
+      for (let i = 0; i <= 10; i++) {
+        const candidate = now.setZone(asset.tz).plus({ days: i })
+          .set({ hour: ev.time[0], minute: ev.time[1], second: 0, millisecond: 0 });
+
+        if (!isTradingWeekday(candidate)) continue;
+        const candidateNY = candidate.setZone("America/New_York");
+        const blocked =
+          candidateNY.weekday === 6 ||
+          (candidateNY.weekday === 7 && candidateNY.hour < 17) ||
+          (candidateNY.weekday === 5 && candidateNY.hour >= 17);
+        if (blocked) continue;
+        if (candidate.toMillis() <= now.toMillis()) continue;
+
+        const diff = candidate.toMillis() - now.toMillis();
+        if (!best || diff < best.diff) best = { asset, label: ev.label, dt: candidate, diff };
+        break;
+      }
+    });
+  });
+
+  return best;
 }
 
 // ─── LEAD SUBMIT ─────────────────────────────────────────────
