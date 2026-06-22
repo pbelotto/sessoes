@@ -2399,53 +2399,6 @@
   .market-map-card .timeline-inner { min-width: 780px; }
 }
 
-
-/* ============================================================
-   V6 — ORDEM OPERACIONAL + GRIDS SEM QUEBRA NO DESKTOP
-============================================================ */
-.asset-timeline-section { margin-top: 0; }
-
-@media (min-width: 1050px) {
-  .sessions-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 14px;
-  }
-
-  .session-card {
-    padding: 22px 20px;
-    min-height: 288px;
-  }
-
-  .sess-flag { font-size: 25px; }
-  .sess-name { font-size: 17px; }
-  .sess-hours { font-size: 13px; }
-  .sess-desc { font-size: 12.4px; line-height: 1.52; }
-  .sess-tags { gap: 4px; }
-  .tag { font-size: 10.5px; padding: 3px 8px; }
-
-  .clocks-grid {
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 12px;
-  }
-
-  .clock-card {
-    padding: 18px 10px;
-    min-width: 0;
-  }
-
-  .clock-city { font-size: 9px; }
-  .clock-time { font-size: 17px; }
-  .clock-tz { font-size: 8.5px; overflow-wrap: anywhere; }
-
-  .asset-timeline-scroll { overflow-x: hidden; overflow-y: hidden; }
-  .asset-timeline-inner { min-width: 0; width: 100%; }
-}
-
-@media (min-width: 641px) and (max-width: 1049px) {
-  .sessions-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .clocks-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-}
-
   </style>
 </head>
 <body>
@@ -2820,42 +2773,6 @@
       <span class="badge badge-g" style="flex-shrink:0;align-self:flex-start;margin-top:2px">Gratuito</span>
     </div>
 
-    <div class="divider"></div>
-
-    <!-- ── ASSET TIMELINE ── -->
-    <section class="section asset-timeline-section">
-      <div class="section-header fade-up asset-section-head">
-        <div>
-          <div class="eyebrow">Mercados acompanhados</div>
-          <h2>Mercados que você realmente acompanha</h2>
-          <p>Veja primeiro os ativos operacionais: HK50, JP225, GER40, NAS100, US30, Ouro e Forex — com Hang Seng separado por leilão, pré-market, abertura do à vista e intervalo do almoço. Tudo convertido para <strong id="asset-tz-label" style="color:var(--t1)">seu fuso</strong>.</p>
-        </div>
-        <div class="next-asset-card card" id="next-asset-card">
-          <div class="next-asset-label">Próximo evento</div>
-          <div class="next-asset-name" id="next-asset-name">—</div>
-          <div class="next-asset-time" id="next-asset-time">—</div>
-        </div>
-      </div>
-
-      <div class="card asset-timeline-card">
-        <div class="asset-timeline-toolbar">
-          <div>
-            <div class="asset-timeline-title">Linha do tempo operacional 24h</div>
-            <div class="asset-timeline-sub">No desktop, ajusta na largura. No celular, arraste para o lado.</div>
-          </div>
-          <span class="badge badge-au">HK50 separado</span><span class="badge badge-g">Visão principal</span>
-        </div>
-        <div class="asset-timeline-scroll">
-          <div class="asset-timeline-inner" id="asset-timeline-inner">
-            <!-- JS populated -->
-          </div>
-        </div>
-      </div>
-    </section>
-
-
-
-
     <!-- ── SESSION STATUS ── -->
     <section class="section">
       <div class="section-header fade-up">
@@ -2950,6 +2867,41 @@
         <!-- JS populated -->
       </div>
     </section>
+
+    <div class="divider"></div>
+
+    <!-- ── ASSET TIMELINE ── -->
+    <section class="section asset-timeline-section">
+      <div class="section-header fade-up asset-section-head">
+        <div>
+          <div class="eyebrow">Linha do tempo dos ativos</div>
+          <h2>Mercados que você realmente acompanha</h2>
+          <p>Inclui Hang Seng com leilão, pré-market, abertura do à vista e intervalo do almoço — convertido para <strong id="asset-tz-label" style="color:var(--t1)">seu fuso</strong>.</p>
+        </div>
+        <div class="next-asset-card card" id="next-asset-card">
+          <div class="next-asset-label">Próximo evento</div>
+          <div class="next-asset-name" id="next-asset-name">—</div>
+          <div class="next-asset-time" id="next-asset-time">—</div>
+        </div>
+      </div>
+
+      <div class="card asset-timeline-card">
+        <div class="asset-timeline-toolbar">
+          <div>
+            <div class="asset-timeline-title">Ativos globais 24h</div>
+            <div class="asset-timeline-sub">No desktop, ajusta na largura. No celular, arraste para o lado.</div>
+          </div>
+          <span class="badge badge-au">HK50 separado</span>
+        </div>
+        <div class="asset-timeline-scroll">
+          <div class="asset-timeline-inner" id="asset-timeline-inner">
+            <!-- JS populated -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+
     <!-- TICKMILL PARTNER CARD -->
     <div class="partner-card fade-up">
       <div class="partner-badge">🤝 Parceiro Oficial</div>
@@ -3453,6 +3405,14 @@ let minuteTimer   = null;
 
 // ─── BOOT ─────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
+  const params = new URLSearchParams(window.location.search);
+
+  // Use /sessoes/?reset=1, /sessoes/?novo=1 or /sessoes/?cadastro=1
+  // to force the lead gate again without needing DevTools/Console.
+  if (params.has("reset") || params.has("novo") || params.has("cadastro")) {
+    localStorage.removeItem("volatilityMapUnlocked");
+  }
+
   const unlocked = localStorage.getItem("volatilityMapUnlocked") === "true";
   const savedTz  = localStorage.getItem("selectedTimezone");
 
@@ -4209,7 +4169,7 @@ function findNextAssetEvent() {
 // ─── LEAD SUBMIT ─────────────────────────────────────────────
 async function submitLead() {
   const name     = document.getElementById("f-name").value.trim();
-  const email    = document.getElementById("f-email").value.trim();
+  const email    = document.getElementById("f-email").value.trim().toLowerCase();
   const ddi      = (document.getElementById("f-ddi")?.value  || "").replace(/\D/g, "");
   const ddd      = (document.getElementById("f-ddd")?.value  || "").replace(/\D/g, "");
   const num      = (document.getElementById("f-num")?.value  || "").replace(/\D/g, "");
@@ -4219,10 +4179,14 @@ async function submitLead() {
 
   errEl.style.display = "none";
 
-  if (!name)                  return showErr("Por favor, informe seu nome.");
-  if (!email.includes("@"))   return showErr("Por favor, informe um e-mail válido.");
+  if (!name)                return showErr("Por favor, informe seu nome.");
+  if (!email.includes("@")) return showErr("Por favor, informe um e-mail válido.");
   if (whatsapp.replace(/\D/g,"").length < 8)
-                              return showErr("Por favor, informe DDD e número do WhatsApp.");
+                            return showErr("Por favor, informe DDD e número do WhatsApp.");
+
+  if (!sb || !SB_CONFIGURED) {
+    return showErr("Não foi possível conectar ao sistema de cadastro. Tente novamente em alguns segundos.");
+  }
 
   // Loading
   btn.classList.add("btn-loading");
@@ -4232,64 +4196,44 @@ async function submitLead() {
   const detected    = detectedTz;
   const countryHint = COUNTRY_HINTS[detected] || detected.split("/")[0];
 
-  // Save to Supabase
   try {
-    if (sb && SB_CONFIGURED) {
+    /*
+      A página grava apenas na tabela bruta da ferramenta.
+      O Supabase, via trigger, sincroniza automaticamente com:
+      - pessoas
+      - pessoa_eventos
 
-      // ── 1. Salva na tabela específica da ferramenta (com dados de timezone) ──
-      const { error: e1 } = await sb.from("leads_market_sessions").insert([{
-        name,
-        email,
-        whatsapp,
-        detected_timezone:  detected,
-        selected_timezone:  detected,
-        timezone_label:     TZ_LABELS[detected] || detected,
-        country_hint:       countryHint,
-        user_agent:         navigator.userAgent,
-        lead_source:        "mapa_volatilidade_global",
-      }]);
-      if (e1) console.warn("leads_market_sessions error:", e1);
+      Isso evita duplicidade e mantém o CRM central limpo.
+    */
+    const { error } = await sb.from("leads_market_sessions").insert([{
+      name,
+      email,
+      whatsapp,
+      detected_timezone:  detected,
+      selected_timezone:  activeTz || detected,
+      timezone_label:     TZ_LABELS[activeTz || detected] || activeTz || detected,
+      country_hint:       countryHint,
+      user_agent:         navigator.userAgent,
+      lead_source:        "mapa_volatilidade_global",
+    }]);
 
-      // ── 2. Upsert na tabela central de pessoas (CRM unificado) ──
-      const { error: e2 } = await sb.from("pessoas").upsert([{
-        email,
-        nome:           name,
-        telefone:       whatsapp,
-        status:         "lead",
-        origem:         "mapa_volatilidade_global",
-        ultimo_contato: new Date().toISOString(),
-        updated_at:     new Date().toISOString(),
-      }], { onConflict: "email", ignoreDuplicates: false });
-      if (e2) console.warn("pessoas upsert error:", e2);
-
-      // ── 3. Registra evento na linha do tempo ──
-      const { error: e3 } = await sb.from("pessoa_eventos").insert([{
-        email,
-        telefone:        whatsapp,
-        tipo:            "primeiro_contato",
-        canal:           "mapa_volatilidade",
-        origem:          "mapa_volatilidade_global",
-        descricao:       "Lead capturado via Mapa de Volatilidade Global",
-        dados_extras: {
-          detected_timezone: detected,
-          timezone_label:    TZ_LABELS[detected] || detected,
-          country_hint:      countryHint,
-          user_agent:        navigator.userAgent,
-        },
-      }]);
-      if (e3) console.warn("pessoa_eventos error:", e3);
+    if (error) {
+      console.warn("leads_market_sessions error:", error);
+      return showErr("Não foi possível salvar seu cadastro. Confira os dados e tente novamente.");
     }
-  } catch(e) { console.warn("Supabase error (proceeding anyway):", e); }
 
-  // Unlock regardless of Supabase result
-  localStorage.setItem("volatilityMapUnlocked", "true");
+    localStorage.setItem("volatilityMapUnlocked", "true");
 
-  // Smooth transition
-  const gate = document.getElementById("gate");
-  gate.style.transition = "opacity .45s ease";
-  gate.style.opacity    = "0";
+    // Smooth transition
+    const gate = document.getElementById("gate");
+    gate.style.transition = "opacity .45s ease";
+    gate.style.opacity    = "0";
 
-  setTimeout(launchApp, 480);
+    setTimeout(launchApp, 480);
+  } catch(e) {
+    console.warn("Supabase error:", e);
+    return showErr("Erro inesperado ao liberar o acesso. Tente novamente.");
+  }
 }
 
 function showErr(msg) {
