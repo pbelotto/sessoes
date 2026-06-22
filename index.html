@@ -2527,7 +2527,164 @@
   }
 }
 
-  </style>
+  
+
+/* ============================================================
+   PATCH V9 — ORDEM DO LAYOUT + MOBILE SEM ROLAGEM HORIZONTAL
+   - Mercados acompanhados sobe para o topo do conteúdo
+   - Timeline principal não arrasta no celular
+   - Selo "Você está aqui" não cobre os horários
+============================================================ */
+
+.market-map-card .tl-now-line {
+  top: 0 !important;
+  bottom: 0 !important;
+}
+
+.market-map-card .tl-now-line::before {
+  top: 10px !important;
+  content: "AGORA" !important;
+  padding: 3px 7px !important;
+  font-size: 8px !important;
+}
+
+.asset-timeline-section {
+  margin-top: 28px;
+}
+
+.asset-timeline-card .asset-timeline-scroll,
+.asset-timeline-scroll {
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+.asset-timeline-inner {
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+@media (max-width: 900px) {
+  html,
+  body,
+  #app,
+  .wrap,
+  .market-map-hero,
+  .timeline-scroll,
+  .asset-timeline-scroll {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+
+  .timeline-scroll {
+    overflow-x: hidden !important;
+    overflow-y: hidden !important;
+    width: 100% !important;
+  }
+
+  .timeline-inner,
+  .market-map-card .timeline-inner {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  .market-map-card .tl-hour-row,
+  .tl-hour-row {
+    padding-left: 58px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .market-map-card .tl-grid,
+  .tl-grid {
+    left: 58px !important;
+  }
+
+  .market-map-card .tl-row-label,
+  .tl-row-label {
+    width: 58px !important;
+    padding-right: 6px !important;
+    font-size: 9px !important;
+    letter-spacing: -.03em !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: clip !important;
+  }
+
+  .market-map-card .tl-track {
+    height: 32px !important;
+    border-radius: 9px !important;
+  }
+
+  .market-map-card .tl-bar {
+    top: 5px !important;
+    height: 21px !important;
+    border-radius: 8px !important;
+  }
+
+  .market-map-card .tl-bar::after {
+    font-size: 0 !important;
+    content: "" !important;
+  }
+
+  .market-map-card .tl-hour {
+    font-size: 8px !important;
+  }
+
+  .market-map-card .tl-now-line {
+    top: 0 !important;
+    bottom: 0 !important;
+  }
+
+  .market-map-card .tl-now-line::before {
+    content: "" !important;
+    display: none !important;
+  }
+
+  .market-map-hint {
+    display: none !important;
+  }
+
+  .asset-timeline-card,
+  .asset-timeline-scroll,
+  .asset-timeline-inner {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .asset-timeline-sub {
+    display: none !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .market-map-card .tl-hour-row,
+  .tl-hour-row {
+    padding-left: 52px !important;
+  }
+
+  .market-map-card .tl-grid,
+  .tl-grid {
+    left: 52px !important;
+  }
+
+  .market-map-card .tl-row-label,
+  .tl-row-label {
+    width: 52px !important;
+    font-size: 8.5px !important;
+  }
+
+  .market-overlaps {
+    grid-template-columns: 1fr !important;
+  }
+
+  .asset-section-head {
+    gap: 14px !important;
+  }
+}
+
+</style>
 </head>
 <body>
 
@@ -2901,6 +3058,41 @@
       <span class="badge badge-g" style="flex-shrink:0;align-self:flex-start;margin-top:2px">Gratuito</span>
     </div>
 
+    <!-- ── ASSET TIMELINE ── -->
+    <section class="section asset-timeline-section">
+      <div class="section-header fade-up asset-section-head">
+        <div>
+          <div class="eyebrow">Linha do tempo dos ativos</div>
+          <h2>Mercados que você realmente acompanha</h2>
+          <p>Inclui Hang Seng com leilão, pré-market, abertura do à vista e intervalo do almoço — convertido para <strong id="asset-tz-label" style="color:var(--t1)">seu fuso</strong>.</p>
+        </div>
+        <div class="next-asset-card card" id="next-asset-card">
+          <div class="next-asset-label">Próximo evento</div>
+          <div class="next-asset-name" id="next-asset-name">—</div>
+          <div class="next-asset-time" id="next-asset-time">—</div>
+        </div>
+      </div>
+
+      <div class="card asset-timeline-card">
+        <div class="asset-timeline-toolbar">
+          <div>
+            <div class="asset-timeline-title">Ativos globais 24h</div>
+            <div class="asset-timeline-sub">Ajustado à largura da tela no desktop e no celular.</div>
+          </div>
+          <span class="badge badge-au">HK50 separado</span>
+        </div>
+        <div class="asset-timeline-scroll">
+          <div class="asset-timeline-inner" id="asset-timeline-inner">
+            <!-- JS populated -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+
+    <div class="divider"></div>
+
     <!-- ── SESSION STATUS ── -->
     <section class="section">
       <div class="section-header fade-up">
@@ -2997,38 +3189,6 @@
     </section>
 
     <div class="divider"></div>
-
-    <!-- ── ASSET TIMELINE ── -->
-    <section class="section asset-timeline-section">
-      <div class="section-header fade-up asset-section-head">
-        <div>
-          <div class="eyebrow">Linha do tempo dos ativos</div>
-          <h2>Mercados que você realmente acompanha</h2>
-          <p>Inclui Hang Seng com leilão, pré-market, abertura do à vista e intervalo do almoço — convertido para <strong id="asset-tz-label" style="color:var(--t1)">seu fuso</strong>.</p>
-        </div>
-        <div class="next-asset-card card" id="next-asset-card">
-          <div class="next-asset-label">Próximo evento</div>
-          <div class="next-asset-name" id="next-asset-name">—</div>
-          <div class="next-asset-time" id="next-asset-time">—</div>
-        </div>
-      </div>
-
-      <div class="card asset-timeline-card">
-        <div class="asset-timeline-toolbar">
-          <div>
-            <div class="asset-timeline-title">Ativos globais 24h</div>
-            <div class="asset-timeline-sub">No desktop, ajusta na largura. No celular, arraste para o lado.</div>
-          </div>
-          <span class="badge badge-au">HK50 separado</span>
-        </div>
-        <div class="asset-timeline-scroll">
-          <div class="asset-timeline-inner" id="asset-timeline-inner">
-            <!-- JS populated -->
-          </div>
-        </div>
-      </div>
-    </section>
-
 
     <!-- TICKMILL PARTNER CARD -->
     <div class="partner-card fade-up">
