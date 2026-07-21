@@ -16,6 +16,15 @@
   })(window,document,'script','dataLayer','GTM-NF4JJP4H');</script>
   <!-- End Google Tag Manager -->
 
+  <!-- Google tag fallback for GA4 lead events. Page views stay measured by the existing setup. -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-2TV77E2D4S"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-2TV77E2D4S', { send_page_view: false });
+  </script>
+
   <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <!-- Luxon (timezone) -->
@@ -3483,6 +3492,7 @@ const SUPABASE_ANON_KEY = "sb_publishable_OhDFF1QPLZsQw2355W2MnQ_vew9ueEB";
 // ─── INIT SUPABASE ────────────────────────────────────────────
 // Só inicializa se as credenciais reais foram preenchidas
 let sb;
+let generateLeadPushed = false;
 const SB_CONFIGURED = (
   SUPABASE_URL      !== "COLE_AQUI_SUA_URL"  &&
   SUPABASE_ANON_KEY !== "COLE_AQUI_SUA_ANON_KEY" &&
@@ -3498,6 +3508,21 @@ if (SB_CONFIGURED) {
 
 // ─── LUXON ────────────────────────────────────────────────────
 const { DateTime } = luxon;
+
+function pushGenerateLead() {
+  if (generateLeadPushed) return;
+  generateLeadPushed = true;
+
+  if (typeof gtag !== "function") return;
+
+  gtag("event", "generate_lead", {
+    lead_type: "market_sessions_access",
+    form_name: "sessoes_market_sessions",
+    page_path: window.location.pathname,
+    method: "supabase_insert",
+    source_system: "supabase"
+  });
+}
 
 // ─── DATA: SESSIONS ──────────────────────────────────────────
 const SESSIONS = [
@@ -4650,6 +4675,8 @@ async function submitLead() {
       console.warn("leads_market_sessions error:", error);
       return showErr("Não foi possível salvar seu cadastro. Confira os dados e tente novamente.");
     }
+
+    pushGenerateLead();
 
     localStorage.setItem("volatilityMapUnlocked", "true");
 
